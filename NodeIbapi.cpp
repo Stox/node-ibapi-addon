@@ -303,7 +303,7 @@ Handle<Value> NodeIbapi::PlaceOrder( const Arguments &args ) {
     HandleScope scope;
     NodeIbapi* obj = ObjectWrap::Unwrap<NodeIbapi>( args.This() );
 
-    if ( isWrongArgNumber( args, 6 ) ) {
+    if ( isWrongArgNumber( args, 7 ) ) {
         return scope.Close( Undefined() );
     }
 
@@ -320,6 +320,7 @@ Handle<Value> NodeIbapi::PlaceOrder( const Arguments &args ) {
     order.totalQuantity = args[3]->Int32Value();
     order.orderType = getChar( args[4] );
     order.lmtPrice = args[5]->NumberValue();
+    order.auxPrice = args[6]->NumberValue();
 
     obj->m_client.placeOrder( orderId, contract, order );
     return scope.Close( Undefined() );
@@ -1590,8 +1591,6 @@ Handle<Value> NodeIbapi::Position( const Arguments &args ) {
                   convertContractForNode( newPosition.contract ) ); 
     retPosition->Set( String::NewSymbol( "position" ),
                   Integer::New( newPosition.position ) ); 
-    retPosition->Set( String::NewSymbol( "avgCost" ),
-                  Number::New( newPosition.avgCost ) ); 
     return scope.Close( retPosition );
 }
 Handle<Value> NodeIbapi::PositionEnd( const Arguments &args ) {

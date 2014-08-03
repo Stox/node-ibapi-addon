@@ -29,11 +29,18 @@ var msftContract2 = ibcontract.createContract();
 msftContract2.conId = 272093; // you can look this up from Contract Details in TWS
 msftContract2.exchange = 'SMART';
 
-var placeMsftOrder = function (contract, oId) {
+// Must have lmtPrice and auxPrice in the arguments
+var placeMsftLmtOrder = function (contract, oId) {
   console.log('Next valid order Id: %d',oId);
   console.log("Placing order for MSFT");
   obj.placeOrder(oId,contract, 
-    "BUY", 1000, "LMT", 0.11);
+    "BUY", 1000, "LMT", 0.11, 0.11);
+}
+var placeMsftMitOrder = function (contract, oId) {
+  console.log('Next valid order Id: %d',oId);
+  console.log("Placing order for MSFT");
+  obj.placeOrder(oId,contract, 
+    "BUY", 1000, "MIT", 0.11, 0.11);
 }
 var cancelPrevOrder = function (oId) {
   console.log('canceling order: %d', oId);
@@ -55,10 +62,10 @@ obj.on('connected', function () {
   orderId = data.orderId;
   setInterval(doReqFunc,100);
   setInterval(function () {
-    obj.funcQueue.push(placeMsftOrder(msftContract1, orderId));
+    obj.funcQueue.push(placeMsftLmtOrder(msftContract1, orderId));
     obj.funcQueue.push(cancelPrevOrder(orderId));
     orderId = orderId + 1;
-    obj.funcQueue.push(placeMsftOrder(msftContract2, orderId));
+    obj.funcQueue.push(placeMsftMitOrder(msftContract2, orderId));
     obj.funcQueue.push(cancelPrevOrder(orderId));
     orderId = orderId + 1;
   },2000);

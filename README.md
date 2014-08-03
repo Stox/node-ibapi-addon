@@ -1,7 +1,7 @@
 node-ibapi-addon
 ================
 
-Interactive Brokers API addon for Node.js compatible with IB API 9.69
+Interactive Brokers API addon for Node.js compatible with IB API 9.70
 
 This addon uses the latest stable Interactive Brokers POSIX C++ API.
 
@@ -12,9 +12,10 @@ For direct JavaScript implementation of IB API for Node.js, please visit Pilwon 
 
 ### Change Notes:
 
-* 2013-03-17 - 0.1.13 - Smoother installation to multiple OSes
-* 2013-01-17 - 0.1.0  - all EWrapper events bound in ibapi.js
-* 2013-01-09 - 0.0.4  - get commands output JS objects
+* 2014-04-22 - 0.1.17 - Compatibility fix for API 9.70
+* 2014-03-17 - 0.1.13 - Smoother installation to multiple OSes
+* 2014-01-17 - 0.1.0  - all EWrapper events bound in ibapi.js
+* 2014-01-09 - 0.0.4  - get commands output JS objects
 * 2013-12-29 - 0.0.3  - Added EventEmitter support
 * 2013-09-26 - 0.0.2  - EClientSocket hooks and EWrapper hooks
 * 2013-09-02 - 0.0.1  - Initial commit - connect, disconnect, isConnected works
@@ -136,7 +137,7 @@ The following commands are extended commands in ibapi.js.
 .isConnected()
 .reqMktData(reqId, contract, genericTickType, snapShot)
 .cancelMktData(reqId)
-.placeOrder(orderId, contract, action, quantity, orderType, price)
+.placeOrder(orderId, contract, action, quantity, orderType, price, auxPrice)
 .cancelOrder(orderId)
 .reqOpenOrders()
 .reqAccountUpdates(subscribe, acctCode)

@@ -156,7 +156,7 @@ public:
     void marketDataType( TickerId reqId, int marketDataType );
     void commissionReport( const CommissionReport& commissionReport );
     void position( const IBString& account, const Contract& contract, 
-                   int position, double avgCost );
+                   int position );
     void positionEnd();
     void accountSummary( int reqId, const IBString& account, 
                          const IBString& tag, const IBString& value, 

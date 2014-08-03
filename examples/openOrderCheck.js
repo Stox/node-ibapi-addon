@@ -34,7 +34,7 @@ msftContract.currency = 'USD';
 var placeThatOrder = function () {
     console.log('Next valid order Id: %d',orderId);
     console.log("Placing order for MSFT");
-    obj.placeOrder(orderId, msftContract, "BUY", 1000, "LMT", 0.11);
+    obj.placeOrder(orderId, msftContract, "BUY", 1000, "LMT", 0.11, 0.11);
     orderId = orderId + 1;
     isOrderPlaced = true;
 }

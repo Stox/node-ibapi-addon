@@ -611,14 +611,12 @@ void IbPosixClient::commissionReport(
     this->m_commissionReports.push( newData );
 }
 void IbPosixClient::position( const IBString& account, 
-                              const Contract& contract, int position, 
-                              double avgCost ) {
+                              const Contract& contract, int position ) {
     PositionData newData;
     newData.isValid = true;
     newData.account = account;
     newData.contract = contract;
     newData.position = position;
-    newData.avgCost = avgCost;
     this->m_positions.push( newData );
 }
 void IbPosixClient::positionEnd() {
