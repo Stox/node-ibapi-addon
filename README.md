@@ -25,10 +25,14 @@ For direct JavaScript implementation of IB API for Node.js, please visit Pilwon 
 ```
 npm install node-gyp -g
 ```
+* Install unzip if Linux
+```
+sudo apt-get install unzip
+```
 
 ### Additional installation dependency for Windows:
 * Install MinGW
-* Install msys-unzip
+* Install msys-unzip instead of unzip
 ```
 mingw-get install msys-unzip
 ```
