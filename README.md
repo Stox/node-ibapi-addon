@@ -81,7 +81,7 @@ npm install ibapi --msvs_version=2012
 8. Profit!
 
 ```js
-var addon = require('../ibapi');
+var addon = require('ibapi');
 var obj = new addon.NodeIbapi();
 
 var orderId = -1;
