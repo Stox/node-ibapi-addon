@@ -303,7 +303,11 @@ Handle<Value> NodeIbapi::PlaceOrder( const Arguments &args ) {
     HandleScope scope;
     NodeIbapi* obj = ObjectWrap::Unwrap<NodeIbapi>( args.This() );
 
-    if ( isWrongArgNumber( args, 7 ) ) {
+    // TODO: Better way to handle arg num issue
+    if ( args.Length() != 7 && args.Length() != 3 ) {
+        ThrowException(
+            Exception::TypeError(
+                String::New( "Wrong number of arguments, must be 3 or 7" ) ) );
         return scope.Close( Undefined() );
     }
 
@@ -316,11 +320,23 @@ Handle<Value> NodeIbapi::PlaceOrder( const Arguments &args ) {
     Handle<Object> ibContract = Handle<Object>::Cast( args[1] );
     convertContractForIb( ibContract, contract ); 
 
-    order.action = getChar( args[2] );
-    order.totalQuantity = args[3]->Int32Value();
-    order.orderType = getChar( args[4] );
-    order.lmtPrice = args[5]->NumberValue();
-    order.auxPrice = args[6]->NumberValue();
+    if ( args.Length() == 7 ) {
+        if ( isWrongType( !args[2]->IsString(), 2 ) )
+            return scope.Close( Undefined() );
+
+        order.action = getChar( args[2] );
+        order.totalQuantity = args[3]->Int32Value();
+        order.orderType = getChar( args[4] );
+        order.lmtPrice = args[5]->NumberValue();
+        order.auxPrice = args[6]->NumberValue();
+    }
+    else if ( args.Length() == 3 ) {
+        if ( isWrongType( !args[2]->IsObject(), 2 ) )
+            return scope.Close( Undefined() );
+
+        Handle<Object> ibOrder = Handle<Object>::Cast( args[2] );
+        convertOrderForIb( ibOrder, order );
+    }
 
     obj->m_client.placeOrder( orderId, contract, order );
     return scope.Close( Undefined() );
@@ -1640,7 +1656,7 @@ Handle<Value> NodeIbapi::AccountSummaryEnd( const Arguments &args ) {
     retAcctSumEnd->Set( String::NewSymbol( "isValid" ),
                   Boolean::New( newAcctSumEnd.isValid ) );
     retAcctSumEnd->Set( String::NewSymbol( "reqId" ),
-                  Boolean::New( newAcctSumEnd.reqId ) );
+                  Integer::New( newAcctSumEnd.reqId ) );
 
     return scope.Close( retAcctSumEnd );
 }
@@ -1693,33 +1709,26 @@ void NodeIbapi::convertContractForIb( Handle<Object> ibContract,
     contract.conId = ibContract->Get( String::New( "conId" ) )->Int32Value();
     contract.exchange = 
         getChar( ibContract->Get( String::New( "exchange" ) ) );
-    //if ( contract.conId == 0 ) {
-        contract.symbol = getChar( ibContract->Get( String::New( "symbol" ) ) );
-        contract.secType = 
-            getChar( ibContract->Get( String::New( "secType" ) ) );
-        contract.expiry = 
-            getChar( ibContract->Get( String::New( "expiry" ) ) );
-        contract.strike = 
-            ibContract->Get( String::New( "strike" ) )->NumberValue();
-        contract.right = 
-            getChar( ibContract->Get( String::New( "right" ) ) );
-        contract.multiplier = 
-            getChar( ibContract->Get( String::New( "multiplier" ) ) );
-        contract.primaryExchange = 
-            getChar( ibContract->Get( String::New( "primaryExchange" ) ) );
-        contract.currency = 
-            getChar( ibContract->Get( String::New( "currency" ) ) );
-        contract.localSymbol = 
-            getChar( ibContract->Get( String::New( "localSymbol" ) ) );
-        contract.tradingClass = 
-            getChar( ibContract->Get( String::New( "tradingClass" ) ) );
-        contract.includeExpired = 
-            ibContract->Get( String::New( "includeExpired" ) )->BooleanValue();
-        contract.secIdType = 
-            getChar( ibContract->Get( String::New( "secIdType" ) ) );
-        contract.secId = 
-            getChar( ibContract->Get( String::New( "secId" ) ) );
-    //}
+
+    contract.symbol = getChar( ibContract->Get( String::New( "symbol" ) ) );
+    contract.secType = getChar( ibContract->Get( String::New( "secType" ) ) );
+    contract.expiry = getChar( ibContract->Get( String::New( "expiry" ) ) );
+    contract.strike = ibContract->Get( String::New( "strike" ) )->NumberValue();
+    contract.right = getChar( ibContract->Get( String::New( "right" ) ) );
+    contract.multiplier = 
+        getChar( ibContract->Get( String::New( "multiplier" ) ) );
+    contract.primaryExchange = 
+        getChar( ibContract->Get( String::New( "primaryExchange" ) ) );
+    contract.currency = getChar( ibContract->Get( String::New( "currency" ) ) );
+    contract.localSymbol = 
+        getChar( ibContract->Get( String::New( "localSymbol" ) ) );
+    contract.tradingClass = 
+        getChar( ibContract->Get( String::New( "tradingClass" ) ) );
+    contract.includeExpired = 
+        ibContract->Get( String::New( "includeExpired" ) )->BooleanValue();
+    contract.secIdType = 
+        getChar( ibContract->Get( String::New( "secIdType" ) ) );
+    contract.secId = getChar( ibContract->Get( String::New( "secId" ) ) );
 }
 
 Handle<Object> NodeIbapi::convertContractForNode( Contract &contract ) {
@@ -1776,21 +1785,6 @@ void NodeIbapi::convertSubForIb( Handle<Object> scannerSub,
         scannerSub->Get( String::New( "couponRateAbove" ) )->NumberValue();
     double couponRateBelow = 
         scannerSub->Get( String::New( "couponRateBelow" ) )->NumberValue();
-
-    if ( numberOfRows > 0 )
-        subscription.numberOfRows = numberOfRows;
-    if ( abovePrice > 0 )
-        subscription.abovePrice = abovePrice;
-    if ( belowPrice > 0 )
-        subscription.belowPrice = belowPrice;
-    if ( marketCapAbove > 0 )
-        subscription.marketCapAbove = marketCapAbove;
-    if ( marketCapBelow > 0 )
-        subscription.marketCapBelow = marketCapBelow;
-    if ( couponRateAbove > 0 )
-        subscription.couponRateAbove = couponRateAbove;
-    if ( couponRateBelow > 0 )
-        subscription.couponRateBelow = couponRateBelow;
 
     subscription.instrument = 
         getChar( scannerSub->Get( String::New( "instrument" ) ) );
@@ -1931,3 +1925,108 @@ Handle<Object> NodeIbapi::convertExecForNode( Execution &execution ) {
 
     return retExecution;
 }
+
+void NodeIbapi::convertOrderForIb( Handle<Object> ibOrder, Order &order ) {
+        // order identifier
+    order.orderId = ibOrder->Get( String::New( "orderId" ) )->Int32Value();
+    order.clientId = ibOrder->Get( String::New( "clientId" ) )->Int32Value();
+    order.permId = ibOrder->Get( String::New( "permId" ) )->Int32Value();
+
+    // main order fields
+    order.action = getChar( ibOrder->Get( String::New( "action" ) ) );
+    order.totalQuantity = ibOrder->Get( String::New( "totalQuantity" ) )->Int32Value();
+    order.orderType = getChar( ibOrder->Get( String::New( "orderType" ) ) );
+    order.lmtPrice = ibOrder->Get( String::New( "lmtPrice" ) )->NumberValue();
+    order.auxPrice = ibOrder->Get( String::New( "auxPrice" ) )->NumberValue();
+
+    // extended order fields
+    order.tif = getChar( ibOrder->Get( String::New( "tif" ) ) );
+    order.ocaGroup = getChar( ibOrder->Get( String::New( "ocaGroup" ) ) );
+    order.ocaType = ibOrder->Get( String::New( "ocaType" ) )->Int32Value();
+    order.orderRef = getChar( ibOrder->Get( String::New( "orderRef" ) ) );
+    order.transmit = ibOrder->Get( String::New( "transmit" ) )->BooleanValue();
+    order.parentId = ibOrder->Get( String::New( "parentId" ) )->Int32Value();
+    order.blockOrder = ibOrder->Get( String::New( "blockOrder" ) )->BooleanValue();
+    order.sweepToFill = ibOrder->Get( String::New( "sweepToFill" ) )->BooleanValue();
+    order.displaySize = ibOrder->Get( String::New( "displaySize" ) )->Int32Value();
+    order.triggerMethod = ibOrder->Get( String::New( "triggerMethod" ) )->Int32Value();
+    order.outsideRth = ibOrder->Get( String::New( "outsideRth" ) )->BooleanValue();
+    order.hidden = ibOrder->Get( String::New( "hidden" ) )->BooleanValue();
+    order.goodAfterTime = getChar( ibOrder->Get( String::New( "goodAfterTime" ) ) );
+    order.goodTillDate = getChar( ibOrder->Get( String::New( "goodTillDate" ) ) );
+    order.rule80A = getChar( ibOrder->Get( String::New( "rule80A" ) ) );
+    order.allOrNone = ibOrder->Get( String::New( "allOrNone" ) )->BooleanValue();
+    order.minQty = ibOrder->Get( String::New( "minQty" ) )->Int32Value();
+    order.percentOffset = ibOrder->Get( String::New( "percentOffset" ) )->NumberValue();
+    order.overridePercentageConstraints = ibOrder->Get( String::New( "overridePercentageConstraints" ) )->BooleanValue();
+    order.trailStopPrice = ibOrder->Get( String::New( "trailStopPrice" ) )->NumberValue();
+    order.trailingPercent = ibOrder->Get( String::New( "trailingPercent" ) )->NumberValue();
+
+    // financial advisors only
+
+    // institutional (ie non-cleared) only
+
+    // SMART routing only
+    order.discretionaryAmt = ibOrder->Get( String::New( "discretionaryAmt" ) )->NumberValue();
+    order.eTradeOnly = ibOrder->Get( String::New( "eTradeOnly" ) )->BooleanValue();
+    order.firmQuoteOnly = ibOrder->Get( String::New( "firmQuoteOnly" ) )->BooleanValue();
+    order.nbboPriceCap = ibOrder->Get( String::New( "nbboPriceCap" ) )->NumberValue();
+    order.optOutSmartRouting = ibOrder->Get( String::New( "optOutSmartRouting" ) )->BooleanValue();
+
+    // BOX exchange orders only
+    order.auctionStrategy = ibOrder->Get( String::New( "auctionStrategy" ) )->Int32Value();
+    order.startingPrice = ibOrder->Get( String::New( "startingPrice" ) )->NumberValue();
+    order.stockRefPrice = ibOrder->Get( String::New( "stockRefPrice" ) )->NumberValue();
+    order.delta = ibOrder->Get( String::New( "delta" ) )->NumberValue();
+
+    // pegged to stock and VOL orders only
+    order.stockRangeLower = ibOrder->Get( String::New( "stockRangeLower" ) )->NumberValue();
+    order.stockRangeUpper = ibOrder->Get( String::New( "stockRangeUpper" ) )->NumberValue();
+
+    // VOLATILITY ORDERS ONLY
+    order.volatility = ibOrder->Get( String::New( "volatility" ) )->NumberValue();
+    order.volatilityType = ibOrder->Get( String::New( "volatilityType" ) )->Int32Value();
+    order.deltaNeutralOrderType = getChar( ibOrder->Get( String::New( "deltaNeutralOrderType" ) ) );
+    order.deltaNeutralAuxPrice = ibOrder->Get( String::New( "deltaNeutralAuxPrice" ) )->NumberValue();
+    order.deltaNeutralConId = ibOrder->Get( String::New( "deltaNeutralConId" ) )->Int32Value();
+    order.deltaNeutralSettlingFirm = getChar( ibOrder->Get( String::New( "deltaNeutralSettlingFirm" ) ) );
+    order.deltaNeutralClearingAccount = getChar( ibOrder->Get( String::New( "deltaNeutralClearingAccount" ) ) );
+    order.deltaNeutralClearingIntent = getChar( ibOrder->Get( String::New( "deltaNeutralClearingIntent" ) ) );
+    order.deltaNeutralOpenClose = getChar( ibOrder->Get( String::New( "deltaNeutralOpenClose" ) ) );
+    order.deltaNeutralShortSale = ibOrder->Get( String::New( "deltaNeutralShortSale" ) )->BooleanValue();
+    order.deltaNeutralShortSaleSlot = ibOrder->Get( String::New( "deltaNeutralShortSaleSlot" ) )->Int32Value();
+    order.deltaNeutralDesignatedLocation = getChar( ibOrder->Get( String::New( "deltaNeutralDesignatedLocation" ) ) );
+    order.continuousUpdate = ibOrder->Get( String::New( "continuousUpdate" ) )->BooleanValue();
+    order.referencePriceType = ibOrder->Get( String::New( "referencePriceType" ) )->Int32Value();
+
+    // COMBO ORDERS ONLY
+
+    // SCALE ORDERS ONLY
+    order.scaleInitLevelSize = ibOrder->Get( String::New( "scaleInitLevelSize" ) )->Int32Value();
+    order.scaleSubsLevelSize = ibOrder->Get( String::New( "scaleSubsLevelSize" ) )->Int32Value();
+    order.scalePriceIncrement = ibOrder->Get( String::New( "scalePriceIncrement" ) )->NumberValue();
+    order.scalePriceAdjustValue = ibOrder->Get( String::New( "scalePriceAdjustValue" ) )->NumberValue();
+    order.scalePriceAdjustInterval = ibOrder->Get( String::New( "scalePriceAdjustInterval" ) )->Int32Value();
+    order.scaleProfitOffset = ibOrder->Get( String::New( "scaleProfitOffset" ) )->NumberValue();
+    order.scaleAutoReset = ibOrder->Get( String::New( "scaleAutoReset" ) )->BooleanValue();
+    order.scaleInitPosition = ibOrder->Get( String::New( "scaleInitPosition" ) )->Int32Value();
+    order.scaleInitFillQty = ibOrder->Get( String::New( "scaleInitFillQty" ) )->Int32Value();
+    order.scaleRandomPercent = ibOrder->Get( String::New( "scaleRandomPercent" ) )->BooleanValue();
+
+    // HEDGE ORDERS
+    order.hedgeType = getChar( ibOrder->Get( String::New( "hedgeType" ) ) );
+    order.hedgeParam = getChar( ibOrder->Get( String::New( "hedgeParam" ) ) );
+
+    // Clearing info
+    order.account = getChar( ibOrder->Get( String::New( "account" ) ) );
+    order.settlingFirm = getChar( ibOrder->Get( String::New( "settlingFirm" ) ) );
+    order.clearingAccount = getChar( ibOrder->Get( String::New( "clearingAccount" ) ) );
+    order.clearingIntent = getChar( ibOrder->Get( String::New( "clearingIntent" ) ) );
+
+    // ALGO ORDERS ONLY
+
+    // What-if
+
+    // Not Held
+}
+

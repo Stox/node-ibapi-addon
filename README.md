@@ -12,6 +12,7 @@ For direct JavaScript implementation of IB API for Node.js, please visit Pilwon 
 
 ### Change Notes:
 
+* 2014-09-09 - 0.1.19 - Adds order.js and placeOrder can use order obj
 * 2014-04-22 - 0.1.17 - Compatibility fix for API 9.70
 * 2014-03-17 - 0.1.13 - Smoother installation to multiple OSes
 * 2014-01-17 - 0.1.0  - all EWrapper events bound in ibapi.js
@@ -80,7 +81,7 @@ npm install ibapi --msvs_version=2012
 8. Profit!
 
 ```js
-var addon = require('ibapi');
+var addon = require('../ibapi');
 var obj = new addon.NodeIbapi();
 
 var orderId = -1;
@@ -102,6 +103,13 @@ obj.on('connected', function () {
   orderId = data.orderId;
   console.log('nextValidId: ' + orderId);
   setInterval(doReqFunc,100);
+})
+.on('clientError', function (clientError) {
+  console.log('Client error' + clientError.id.toString());
+})
+.on('svrError', function (svrError) {
+  console.log('Error: ' + svrError.id.toString() + ' - ' + 
+    svrError.errorCode.toString() + ' - ' + svrError.errorString.toString());
 })
 .on('disconnected', function () {
   console.log('disconnected');
@@ -137,6 +145,9 @@ The following commands are extended commands in ibapi.js.
 .isConnected()
 .reqMktData(reqId, contract, genericTickType, snapShot)
 .cancelMktData(reqId)
+// placeOrder can take either 
+.placeOrder(orderId, contrct, order)
+// or
 .placeOrder(orderId, contract, action, quantity, orderType, price, auxPrice)
 .cancelOrder(orderId)
 .reqOpenOrders()
