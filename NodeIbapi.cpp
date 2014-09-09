@@ -1769,21 +1769,21 @@ Handle<Object> NodeIbapi::convertContractForNode( Contract &contract ) {
 void NodeIbapi::convertSubForIb( Handle<Object> scannerSub,
                                  ScannerSubscription &subscription ) {
 
-    int numberOfRows =  
+    subscription.numberOfRows =  
         scannerSub->Get( String::New( "numberOfRows" ) )->Int32Value();
-    double abovePrice =  
+    subscription.abovePrice =  
         scannerSub->Get( String::New( "abovePrice" ) )->NumberValue();
-    double belowPrice =  
+    subscription.belowPrice =  
         scannerSub->Get( String::New( "belowPrice" ) )->NumberValue();
-    int aboveVolume =  
+    subscription.aboveVolume =  
         scannerSub->Get( String::New( "aboveVolume" ) )->Int32Value();
-    double marketCapAbove = 
+    subscription.marketCapAbove = 
         scannerSub->Get( String::New( "marketCapAbove" ) )->NumberValue();
-    double marketCapBelow = 
+    subscription.marketCapBelow = 
         scannerSub->Get( String::New( "marketCapBelow" ) )->NumberValue();
-    double couponRateAbove = 
+    subscription.couponRateAbove = 
         scannerSub->Get( String::New( "couponRateAbove" ) )->NumberValue();
-    double couponRateBelow = 
+    subscription.couponRateBelow = 
         scannerSub->Get( String::New( "couponRateBelow" ) )->NumberValue();
 
     subscription.instrument = 
