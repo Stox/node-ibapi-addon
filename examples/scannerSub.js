@@ -19,7 +19,7 @@ var doReqFunc = function () {
 
 var impVolGainers = scanner.createScannerSub();
 impVolGainers.instrument = "STK";
-impVolGainers.scanCode = "TOP_OPT_IMP_VOLAT_GAIN";
+impVolGainers.scanCode = "TOP_PERC_GAIN";
 
 var impVolGainerScan = function () {
   obj.reqScannerSubscription(1, impVolGainers);  

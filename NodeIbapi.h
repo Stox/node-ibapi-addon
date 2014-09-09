@@ -126,6 +126,7 @@ private:
                                  ScannerSubscription &subscription );
     static Handle<Object> convertContDetailForNode( ContractDetails &contDet );
     static Handle<Object> convertExecForNode( Execution &execution );
+    static void convertOrderForIb( Handle<Object> ibOrder, Order &order );
 
     IbPosixClient m_client;
 
