@@ -25,9 +25,11 @@ public:
     bool connect( const char * host, unsigned int port, int clientId = 0 );
     void disconnect() const;
     bool isConnected() const;
-
+    int serverVersion();
+    IBString TwsConnectionTime();
     void reqMktData( TickerId id, const Contract &contract, 
-                     const IBString &genericTicks, bool snapshot );
+                     const IBString &genericTicks, bool snapshot,
+                     const TagValueListSPtr& mktDataOptions );
     void cancelMktData( TickerId id );
     void placeOrder( OrderId id, const Contract &contract, 
                      const Order &order );
@@ -39,7 +41,7 @@ public:
     bool checkMessages();
     void reqContractDetails( int reqId, const Contract &contract );
     void reqMktDepth( TickerId tickerId, const Contract &contract, 
-                      int numRows );
+                      int numRows, const TagValueListSPtr& mktDepthOptions );
     void cancelMktDepth( TickerId tickerId );
     void reqNewsBulletins( bool allMsgs );
     void cancelNewsBulletins();
@@ -54,18 +56,21 @@ public:
                             const IBString &durationStr, 
                             const IBString & barSizeSetting, 
                             const IBString &whatToShow, int useRTH, 
-                            int formatDate );
+                            int formatDate,
+                            const TagValueListSPtr& chartOptions );
     void exerciseOptions( TickerId tickerId, const Contract &contract, 
                           int exerciseAction, int exerciseQuantity, 
                           const IBString &account, int override );
     void cancelHistoricalData( TickerId tickerId );
     void reqRealTimeBars( TickerId id, const Contract &contract, int barSize, 
-                          const IBString &whatToShow, bool useRTH );
+                          const IBString &whatToShow, bool useRTH,
+                          const TagValueListSPtr& realTimeBarsOptions );
     void cancelRealTimeBars( TickerId tickerId );
     void cancelScannerSubscription( int tickerId );
     void reqScannerParameters();
     void reqScannerSubscription( int tickerId, 
-                                 const ScannerSubscription &subscription );
+                           const ScannerSubscription &subscription,
+                           const TagValueListSPtr& scannerSubscriptionOptions );
     void reqCurrentTime();
     void reqFundamentalData( TickerId reqId, const Contract &contract, 
                              const IBString &reportType );
@@ -83,6 +88,12 @@ public:
     void reqAccountSummary( int reqId, const IBString& groupName, 
                             const IBString& tags );
     void cancelAccountSummary( int reqId );
+    void verifyRequest( const IBString& apiName, const IBString& apiVersion);
+    void verifyMessage( const IBString& apiData);
+    void queryDisplayGroups( int reqId);
+    void subscribeToGroupEvents( int reqId, int groupId);
+    void updateDisplayGroup( int reqId, const IBString& contractInfo);
+    void unsubscribeFromGroupEvents( int reqId);
 
 
 // EWrapper
@@ -156,12 +167,16 @@ public:
     void marketDataType( TickerId reqId, int marketDataType );
     void commissionReport( const CommissionReport& commissionReport );
     void position( const IBString& account, const Contract& contract, 
-                   int position );
+                   int position, double avgCost);
     void positionEnd();
     void accountSummary( int reqId, const IBString& account, 
                          const IBString& tag, const IBString& value, 
                          const IBString& curency );
     void accountSummaryEnd( int reqId );
+    void verifyMessageAPI( const IBString& apiData);
+    void verifyCompleted( bool isSuccessful, const IBString& errorText);
+    void displayGroupList( int reqId, const IBString& groups);
+    void displayGroupUpdated( int reqId, const IBString& contractInfo);
 
 // accessors
     TickPriceData getTickPrice(); 
@@ -206,6 +221,10 @@ public:
     PositionEndData getPositionEnd(); 
     AccountSummaryData getAccountSummary(); 
     AccountSummaryEndData getAccountSummaryEnd();
+    VerifyMessageAPIData getVerifyMessageAPI();
+    VerifyCompletedData getVerifyCompleted();
+    DisplayGroupListData getDisplayGroupList();
+    DisplayGroupUpdatedData getDisplayGroupUpdated();
 
 private:
     std::auto_ptr<EPosixClientSocket> m_pClient;
@@ -254,6 +273,10 @@ private:
     std::queue< PositionEndData > m_positionEnd;
     std::queue< AccountSummaryData > m_accountSummaries;
     std::queue< AccountSummaryEndData > m_accountSummaryEnd;
+    std::queue< VerifyMessageAPIData > m_verifyMessageAPIs;
+    std::queue< VerifyCompletedData > m_verifyCompleted;
+    std::queue< DisplayGroupListData > m_displayGroupLists;
+    std::queue< DisplayGroupUpdatedData > m_displayGroupUpdated;
 };
 
 #endif

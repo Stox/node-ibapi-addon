@@ -34,25 +34,11 @@ msftContract.exchange = 'SMART';
 msftContract.primaryExchange = 'NASDAQ';
 msftContract.currency = 'USD';
 
-var aaplJuly500Call = ibcontract.createContract();
-aaplJuly500Call.symbol = 'AAPL';
-aaplJuly500Call.expiry = '20140117';
-aaplJuly500Call.strike = 535.0;
-aaplJuly500Call.right = 'C';
-aaplJuly500Call.secType = 'OPT';
-aaplJuly500Call.multiplier = '100';
-aaplJuly500Call.exchange = 'SMART';
-aaplJuly500Call.currency = 'USD';
-
-
 var subscribeEurUsd = function () {
   obj.reqMktData(1,eurusd,"165",false);
 }
 var subscribeMsft = function () {
   obj.reqMktData(3,msftContract,"165",false);
-}
-var subscribeAaplOpt = function () {
-  obj.reqMktData(4,aaplJuly500Call,"165",false);
 }
 
 obj.on('connected', function () {
@@ -60,7 +46,6 @@ obj.on('connected', function () {
   setInterval(processIbMsg,0.1);
   obj.funcQueue.push(subscribeEurUsd);
   obj.funcQueue.push(subscribeMsft);
-  obj.funcQueue.push(subscribeAaplOpt);
 })
 .once('nextValidId', function (data) {
   orderId = data.orderId;

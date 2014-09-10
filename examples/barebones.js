@@ -15,10 +15,13 @@ obj.on('connected', function () {
   console.log('connected');
   setInterval(processIbMsg,0.1);
   obj.funcQueue.push(addReqId);
+
 })
 .once('nextValidId', function (data) {
+  console.log('Server version ' + obj.serverVersion().toString() );
   orderId = data.orderId;
   console.log('nextValidId: ' + orderId);
+  console.log( obj.twsConnectionTime() );
   setInterval(doReqFunc,100);
 })
 .on('clientError', function (clientError) {

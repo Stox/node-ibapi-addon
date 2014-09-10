@@ -64,6 +64,10 @@ addon.NodeIbapi.prototype.processIbMsg = function () {
   retPositionEnd = this.getPositionEnd();
   retAccountSummary = this.getAccountSummary();
   retAccountSummaryEnd = this.getAccountSummaryEnd();
+  retVerifyMessageAPI = this.getVerifyMessageAPI();
+  retVerifyCompleted = this.getVerifyCompleted();
+  retDisplayGroupList = this.getDisplayGroupList();
+  retDisplayGroupUpdated = this.getDisplayGroupUpdated();
 
   if (retTickPrice.isValid) {
     this.emit('tickPrice', retTickPrice);
@@ -191,7 +195,18 @@ addon.NodeIbapi.prototype.processIbMsg = function () {
   if (retNextValidId.isValid) {
     this.emit('nextValidId', retNextValidId);
   }
-  
+  if (retVerifyMessageAPI.isValid) {
+    this.emit('verifyMessageAPI', retVerifyMessageAPI);
+  }
+  if (retVerifyCompleted.isValid) {
+    this.emit('verifyCompleted', retVerifyCompleted);
+  }
+  if (retDisplayGroupList.isValid) {
+    this.emit('displayGroupList', retDisplayGroupList);
+  }
+  if (retDisplayGroupUpdated.isValid) {
+    this.emit('displayGroupUpdated', retDisplayGroupUpdated);
+  }
 
   if (!this.isConnected())
     this.emit('disconnected');
