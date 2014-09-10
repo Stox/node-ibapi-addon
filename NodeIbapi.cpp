@@ -109,6 +109,14 @@ void NodeIbapi::Init( Handle<Object> exports ) {
         FunctionTemplate::New( AccountSummaryEnd )->GetFunction() );
     tpl->PrototypeTemplate()->Set( String::NewSymbol( "getNextValidId" ),
         FunctionTemplate::New( NextValidId )->GetFunction() );
+    tpl->PrototypeTemplate()->Set( String::NewSymbol( "getVerifyMessageAPI" ),
+        FunctionTemplate::New( VerifyMessageAPI )->GetFunction() );
+    tpl->PrototypeTemplate()->Set( String::NewSymbol( "getVerifyCompleted" ),
+        FunctionTemplate::New( VerifyCompleted )->GetFunction() );
+    tpl->PrototypeTemplate()->Set( String::NewSymbol( "getDisplayGroupList" ),
+        FunctionTemplate::New( DisplayGroupList )->GetFunction() );
+    tpl->PrototypeTemplate()->Set( String::NewSymbol( "getDisplayGroupUpdated" ),
+        FunctionTemplate::New( DisplayGroupUpdated )->GetFunction() );
 
     /// EClientSocket
     tpl->PrototypeTemplate()->Set( String::NewSymbol( "connect" ),
@@ -117,6 +125,10 @@ void NodeIbapi::Init( Handle<Object> exports ) {
         FunctionTemplate::New( Disconnect )->GetFunction() );
     tpl->PrototypeTemplate()->Set( String::NewSymbol( "isConnected" ),
         FunctionTemplate::New( IsConnected )->GetFunction() );
+    tpl->PrototypeTemplate()->Set( String::NewSymbol( "serverVersion" ),
+        FunctionTemplate::New( ServerVersion )->GetFunction() );
+    tpl->PrototypeTemplate()->Set( String::NewSymbol( "twsConnectionTime" ),
+        FunctionTemplate::New( TwsConnectionTime )->GetFunction() );
     tpl->PrototypeTemplate()->Set( String::NewSymbol( "reqMktData" ),
         FunctionTemplate::New( ReqMktData )->GetFunction() );
     tpl->PrototypeTemplate()->Set( String::NewSymbol( "cancelMktData" ),
@@ -205,6 +217,18 @@ void NodeIbapi::Init( Handle<Object> exports ) {
         FunctionTemplate::New( ReqAccountSummary )->GetFunction() );
     tpl->PrototypeTemplate()->Set( String::NewSymbol( "cancelAccountSummary" ),
         FunctionTemplate::New( CancelAccountSummary )->GetFunction() );
+    tpl->PrototypeTemplate()->Set( String::NewSymbol( "verifyRequest" ),
+        FunctionTemplate::New( VerifyRequest )->GetFunction() );
+    tpl->PrototypeTemplate()->Set( String::NewSymbol( "verifyMessage" ),
+        FunctionTemplate::New( VerifyMessage )->GetFunction() );
+    tpl->PrototypeTemplate()->Set( String::NewSymbol( "queryDisplayGroups" ),
+        FunctionTemplate::New( QueryDisplayGroups )->GetFunction() );
+    tpl->PrototypeTemplate()->Set( String::NewSymbol( "subscribeToGroupEvents" ),
+        FunctionTemplate::New( SubscribeToGroupEvents )->GetFunction() );
+    tpl->PrototypeTemplate()->Set( String::NewSymbol( "updateDisplayGroup" ),
+        FunctionTemplate::New( UpdateDisplayGroup )->GetFunction() );
+    tpl->PrototypeTemplate()->Set( String::NewSymbol( "unsubscribeFromGroupEvents" ),
+        FunctionTemplate::New( UnsubscribeFromGroupEvents )->GetFunction() );
 
     //
     Persistent<Function> constructor = 
@@ -263,7 +287,19 @@ Handle<Value> NodeIbapi::ProcessMsg( const Arguments &args ) {
 ///////////////////////////////////////////////////////////////////////////////
 // node implementation for EClientSocket methods
 ///////////////////////////////////////////////////////////////////////////////
+Handle<Value> NodeIbapi::ServerVersion( const Arguments& args ) {
+    HandleScope scope;
+    NodeIbapi* obj = ObjectWrap::Unwrap<NodeIbapi>( args.This() );
 
+    return scope.Close( Integer::New( obj->m_client.serverVersion() ) );
+}
+Handle<Value> NodeIbapi::TwsConnectionTime( const Arguments& args ) {
+    HandleScope scope;
+    NodeIbapi* obj = ObjectWrap::Unwrap<NodeIbapi>( args.This() );
+
+    return scope.Close( String::New( 
+                                obj->m_client.TwsConnectionTime().c_str() ) );
+}
 Handle<Value> NodeIbapi::ReqMktData( const Arguments &args ) {
     HandleScope scope;
     NodeIbapi* obj = ObjectWrap::Unwrap<NodeIbapi>( args.This() );
@@ -282,7 +318,10 @@ Handle<Value> NodeIbapi::ReqMktData( const Arguments &args ) {
 
     bool snapShot = args[3]->BooleanValue();
 
-    obj->m_client.reqMktData( tickerId, contract, genericTick, snapShot );
+    TagValueListSPtr mktDataOptions;
+
+    obj->m_client.reqMktData( tickerId, contract, genericTick, snapShot, 
+                              mktDataOptions );
     return scope.Close( Undefined() );
 }
 Handle<Value> NodeIbapi::CancelMktData( const Arguments &args ) {
@@ -440,7 +479,9 @@ Handle<Value> NodeIbapi::ReqMktDepth( const Arguments &args ) {
 
     int numRows = args[2]->Int32Value();
 
-    obj->m_client.reqMktDepth( tickerId, contract, numRows );
+    TagValueListSPtr mktDepthOptions;
+
+    obj->m_client.reqMktDepth( tickerId, contract, numRows, mktDepthOptions );
     return scope.Close( Undefined() );
 }
 Handle<Value> NodeIbapi::CancelMktDepth( const Arguments &args ) {
@@ -544,9 +585,11 @@ Handle<Value> NodeIbapi::ReqHistoricalData( const Arguments &args ) {
     useRTH = args[6]->Int32Value();
     formatDate = args[7]->Int32Value();
 
+    TagValueListSPtr chartOptions;
+
     obj->m_client.reqHistoricalData( id, contract, endDateTime, durationStr, 
                                      barSizeSetting, whatToShow, useRTH, 
-                                     formatDate );
+                                     formatDate, chartOptions );
     return scope.Close( Undefined() );
 }
 Handle<Value> NodeIbapi::ExerciseOptions( const Arguments &args ) {
@@ -603,8 +646,10 @@ Handle<Value> NodeIbapi::ReqRealTimeBars( const Arguments &args ) {
     int barSize = args[2]->Int32Value();
     IBString whatToShow = getChar( args[3] );
     bool useRTH = args[4]->BooleanValue();
+
+    TagValueListSPtr realTimeBarsOptions;
     obj->m_client.reqRealTimeBars( tickerId, contract, barSize, whatToShow, 
-                                   useRTH );
+                                   useRTH, realTimeBarsOptions );
     return scope.Close( Undefined() );
 }
 Handle<Value> NodeIbapi::CancelRealTimeBars( const Arguments &args ) {
@@ -652,7 +697,10 @@ Handle<Value> NodeIbapi::ReqScannerSubscription( const Arguments &args ) {
     Handle<Object> ibsub = Handle<Object>::Cast( args[1] );
     convertSubForIb( ibsub, subscription );
 
-    obj->m_client.reqScannerSubscription( tickerId, subscription );
+    TagValueListSPtr scannerSubscriptionOptions;
+
+    obj->m_client.reqScannerSubscription( tickerId, subscription,
+                                        scannerSubscriptionOptions );
 
     return scope.Close( Undefined() );
 }
@@ -816,6 +864,113 @@ Handle<Value> NodeIbapi::CancelAccountSummary( const Arguments &args ) {
 
     return scope.Close( Undefined() );
 }
+Handle<Value> NodeIbapi::VerifyRequest( const Arguments& args ) {
+    HandleScope scope;
+    NodeIbapi* obj = ObjectWrap::Unwrap<NodeIbapi>( args.This() );
+    if ( isWrongArgNumber( args, 2 ) ) {
+        return scope.Close( Undefined() );
+    }
+
+    if ( isWrongType( !args[0]->IsString(), 0) ||
+         isWrongType( !args[1]->IsString(), 1) ) {
+        return scope.Close( Undefined() );
+    }
+
+    IBString apiName = getChar( args[0] );
+    IBString apiVersion = getChar( args[1] );
+
+    obj->m_client.verifyRequest( apiName, apiVersion );
+    return scope.Close( Undefined() );
+}
+Handle<Value> NodeIbapi::VerifyMessage( const Arguments& args ) {
+    HandleScope scope;
+    NodeIbapi* obj = ObjectWrap::Unwrap<NodeIbapi>( args.This() );
+    if ( isWrongArgNumber( args, 1 ) ) {
+        return scope.Close( Undefined() );
+    }
+
+    if ( isWrongType( !args[0]->IsString(), 0 ) ) {
+        return scope.Close( Undefined() );
+    }
+
+    IBString apiData = getChar( args[0] );
+
+    obj->m_client.verifyMessage( apiData );
+    return scope.Close( Undefined() );
+}
+Handle<Value> NodeIbapi::QueryDisplayGroups( const Arguments& args ) {
+    HandleScope scope;
+    NodeIbapi* obj = ObjectWrap::Unwrap<NodeIbapi>( args.This() );
+
+    if ( isWrongArgNumber( args, 1 ) ) {
+        return scope.Close( Undefined() );
+    }
+
+    if ( isWrongType( !args[0]->IsInt32(), 0 ) ) {
+        return scope.Close( Undefined() );
+    }
+
+    int reqId = args[0]->Int32Value();
+
+    obj->m_client.queryDisplayGroups( reqId );
+    return scope.Close( Undefined() );
+}
+Handle<Value> NodeIbapi::SubscribeToGroupEvents( const Arguments& args ) {
+    HandleScope scope;
+    NodeIbapi* obj = ObjectWrap::Unwrap<NodeIbapi>( args.This() );
+
+    if ( isWrongArgNumber( args, 2 ) ) {
+        return scope.Close( Undefined() );
+    }
+
+    if ( isWrongType( !args[0]->IsInt32(), 0 ) ||
+         isWrongType( !args[1]->IsInt32(), 1 ) ) {
+        return scope.Close( Undefined() );
+    }
+
+    int reqId = args[0]->Int32Value();
+    int groupId = args[1]->Int32Value();
+
+    obj->m_client.subscribeToGroupEvents( reqId, groupId );
+    return scope.Close( Undefined() );
+}
+Handle<Value> NodeIbapi::UpdateDisplayGroup( const Arguments& args ) {
+    HandleScope scope;
+    NodeIbapi* obj = ObjectWrap::Unwrap<NodeIbapi>( args.This() );
+
+    if ( isWrongArgNumber( args, 2 ) ) {
+        return scope.Close( Undefined() );
+    }
+
+    if ( isWrongType( !args[0]->IsInt32(), 0 ) ||
+         isWrongType( !args[1]->IsString(), 1 ) ) {
+        return scope.Close( Undefined() );
+    }
+
+    int reqId = args[0]->Int32Value();
+    IBString contractInfo = getChar( args[1] );
+
+    obj->m_client.updateDisplayGroup( reqId, contractInfo );
+    return scope.Close( Undefined() );
+}
+Handle<Value> NodeIbapi::UnsubscribeFromGroupEvents( const Arguments& args ) {
+    HandleScope scope;
+    NodeIbapi* obj = ObjectWrap::Unwrap<NodeIbapi>( args.This() );
+
+    if ( isWrongArgNumber( args, 1 ) ) {
+        return scope.Close( Undefined() );
+    }
+
+    if ( isWrongType( !args[0]->IsInt32(), 0 ) ) {
+        return scope.Close( Undefined() );
+    }
+
+    int reqId = args[0]->Int32Value();
+
+    obj->m_client.unsubscribeFromGroupEvents( reqId );
+    return scope.Close( Undefined() );
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Getters
@@ -1606,7 +1761,9 @@ Handle<Value> NodeIbapi::Position( const Arguments &args ) {
     retPosition->Set( String::NewSymbol( "contract" ),
                   convertContractForNode( newPosition.contract ) ); 
     retPosition->Set( String::NewSymbol( "position" ),
-                  Integer::New( newPosition.position ) ); 
+                  Integer::New( newPosition.position ) );
+    retPosition->Set( String::NewSymbol( "avgCost" ),
+                  Number::New( newPosition.avgCost ) ); 
     return scope.Close( retPosition );
 }
 Handle<Value> NodeIbapi::PositionEnd( const Arguments &args ) {
@@ -1659,6 +1816,71 @@ Handle<Value> NodeIbapi::AccountSummaryEnd( const Arguments &args ) {
                   Integer::New( newAcctSumEnd.reqId ) );
 
     return scope.Close( retAcctSumEnd );
+}
+Handle<Value> NodeIbapi::VerifyMessageAPI( const Arguments &args ) {
+    HandleScope scope;
+    NodeIbapi* obj = ObjectWrap::Unwrap<NodeIbapi>( args.This() );
+    
+    VerifyMessageAPIData newVerifyMessageAPI;
+    newVerifyMessageAPI = obj->m_client.getVerifyMessageAPI();
+
+    Handle<Object> retVerifyMessageAPI = Object::New();
+    retVerifyMessageAPI->Set( String::NewSymbol( "isValid" ),
+                        Boolean::New( newVerifyMessageAPI.isValid ) );
+    retVerifyMessageAPI->Set( String::NewSymbol( "apiData" ),
+                        String::New( newVerifyMessageAPI.apiData.c_str() ) );
+    return scope.Close( retVerifyMessageAPI );
+}
+Handle<Value> NodeIbapi::VerifyCompleted( const Arguments &args ) {
+    HandleScope scope;
+    NodeIbapi* obj = ObjectWrap::Unwrap<NodeIbapi>( args.This() );
+    
+    VerifyCompletedData newVerifyCompleted;
+    newVerifyCompleted = obj->m_client.getVerifyCompleted();
+
+    Handle<Object> retVerifyCompleted = Object::New();
+    retVerifyCompleted->Set( String::NewSymbol( "isValid" ),
+                        Boolean::New( newVerifyCompleted.isValid ) );
+    retVerifyCompleted->Set( String::NewSymbol( "isSuccessful" ),
+                        Boolean::New( newVerifyCompleted.isSuccessful ) );
+    retVerifyCompleted->Set( String::NewSymbol( "errorText" ),
+                        String::New( newVerifyCompleted.errorText.c_str() ) );
+
+    return scope.Close( retVerifyCompleted );
+}
+Handle<Value> NodeIbapi::DisplayGroupList( const Arguments &args ) {
+    HandleScope scope;
+    NodeIbapi* obj = ObjectWrap::Unwrap<NodeIbapi>( args.This() );
+    
+    DisplayGroupListData newDisplayGroupList;
+    newDisplayGroupList = obj->m_client.getDisplayGroupList();
+
+    Handle<Object> retDisplayGroupList = Object::New();
+    retDisplayGroupList->Set( String::NewSymbol( "isValid" ),
+                        Boolean::New( newDisplayGroupList.isValid ) );
+    retDisplayGroupList->Set( String::NewSymbol( "reqId" ),
+                        Integer::New( newDisplayGroupList.reqId ) );
+    retDisplayGroupList->Set( String::NewSymbol( "groups" ),
+                        String::New( newDisplayGroupList.groups.c_str() ) );
+
+    return scope.Close( retDisplayGroupList );
+}
+Handle<Value> NodeIbapi::DisplayGroupUpdated( const Arguments &args ) {
+    HandleScope scope;
+    NodeIbapi* obj = ObjectWrap::Unwrap<NodeIbapi>( args.This() );
+    
+    DisplayGroupUpdatedData newDisplayGroupUpdated;
+    newDisplayGroupUpdated = obj->m_client.getDisplayGroupUpdated();
+
+    Handle<Object> retDisplayGroupUpdated = Object::New();
+    retDisplayGroupUpdated->Set( String::NewSymbol( "isValid" ),
+                        Boolean::New( newDisplayGroupUpdated.isValid ) );
+    retDisplayGroupUpdated->Set( String::NewSymbol( "reqId" ),
+                        Integer::New( newDisplayGroupUpdated.reqId ) );
+    retDisplayGroupUpdated->Set( String::NewSymbol( "contractInfo" ),
+                String::New( newDisplayGroupUpdated.contractInfo.c_str() ) );
+
+    return scope.Close( retDisplayGroupUpdated );
 }
 
 

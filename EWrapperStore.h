@@ -263,6 +263,7 @@ struct PositionData {
    IBString account;
    Contract contract;
    int position;
+   double avgCost;
 };
 struct PositionEndData {
     bool isValid;
@@ -279,7 +280,24 @@ struct AccountSummaryEndData {
     bool isValid;
    int reqId;
 };
-
-
+struct VerifyMessageAPIData {
+    bool isValid;
+    IBString apiData;    
+};
+struct VerifyCompletedData {
+    bool isValid;
+    bool isSuccessful;
+    IBString errorText;
+};
+struct DisplayGroupListData {
+    bool isValid;
+    int reqId;
+    IBString groups;
+};
+struct DisplayGroupUpdatedData {
+    bool isValid;
+    int reqId;
+    IBString contractInfo;
+};
 
 #endif // ewrapperstore_def

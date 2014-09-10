@@ -27,6 +27,8 @@ private:
     static Handle<Value> Connect( const Arguments& args );
     static Handle<Value> Disconnect( const Arguments& args );
     static Handle<Value> IsConnected( const Arguments& args );
+    static Handle<Value> ServerVersion( const Arguments& args );
+    static Handle<Value> TwsConnectionTime( const Arguments& args );
     static Handle<Value> ReqMktData( const Arguments& args );
     static Handle<Value> CancelMktData( const Arguments& args );
     static Handle<Value> PlaceOrder( const Arguments& args );
@@ -67,7 +69,14 @@ private:
     static Handle<Value> ReqPositions( const Arguments& args ); 
     static Handle<Value> CancelPositions( const Arguments& args ); 
     static Handle<Value> ReqAccountSummary( const Arguments& args ); 
-    static Handle<Value> CancelAccountSummary( const Arguments& args ); 
+    static Handle<Value> CancelAccountSummary( const Arguments& args );
+    static Handle<Value> VerifyRequest( const Arguments& args );
+    static Handle<Value> VerifyMessage( const Arguments& args );
+    static Handle<Value> QueryDisplayGroups( const Arguments& args );
+    static Handle<Value> SubscribeToGroupEvents( const Arguments& args );
+    static Handle<Value> UpdateDisplayGroup( const Arguments& args );
+    static Handle<Value> UnsubscribeFromGroupEvents( const Arguments& args );
+
 
     // events
     static Handle<Value> TickPrice( const Arguments& args );
@@ -112,7 +121,10 @@ private:
     static Handle<Value> PositionEnd( const Arguments& args );
     static Handle<Value> AccountSummary( const Arguments& args );
     static Handle<Value> AccountSummaryEnd( const Arguments& args );
-
+    static Handle<Value> VerifyMessageAPI( const Arguments& args );
+    static Handle<Value> VerifyCompleted( const Arguments& args );
+    static Handle<Value> DisplayGroupList( const Arguments& args );
+    static Handle<Value> DisplayGroupUpdated( const Arguments& args );
 
 private:
     static char *getChar( Local<Value> value, const char *fallback = "" );

@@ -77,9 +77,17 @@ void IbPosixClient::processMessages() {
 
 
 /////////////////// API EPosixClientSocket method for node access /////////////
+int IbPosixClient::serverVersion() {
+    return m_pClient->serverVersion();
+}
+IBString IbPosixClient::TwsConnectionTime() {
+    return m_pClient->TwsConnectionTime();
+}
 void IbPosixClient::reqMktData( TickerId tickerId, const Contract &contract, 
-                                const IBString &genericTick, bool snapShot ) {
-    m_pClient->reqMktData( tickerId, contract, genericTick, snapShot );
+                                const IBString &genericTick, bool snapShot,
+                                const TagValueListSPtr& mktDataOptions ) {
+    m_pClient->reqMktData( tickerId, contract, genericTick, snapShot,
+                            mktDataOptions );
 }
 void IbPosixClient::cancelMktData( TickerId tickerId ) {
     m_pClient->cancelMktData(tickerId);
@@ -110,9 +118,10 @@ bool IbPosixClient::checkMessages(){
 void IbPosixClient::reqContractDetails( int reqId, const Contract &contract ) {
     m_pClient->reqContractDetails( reqId, contract );
 }
-void IbPosixClient::reqMktDepth(
-    TickerId tickerId, const Contract &contract, int numRows ) {
-    m_pClient->reqMktDepth( tickerId, contract, numRows );
+void IbPosixClient::reqMktDepth( TickerId tickerId, const Contract &contract, 
+                                 int numRows, 
+                                 const TagValueListSPtr& mktDepthOptions ) {
+    m_pClient->reqMktDepth( tickerId, contract, numRows, mktDepthOptions );
 }
 void IbPosixClient::cancelMktDepth( TickerId tickerId ) {
     m_pClient->cancelMktDepth( tickerId );
@@ -147,10 +156,11 @@ void IbPosixClient::reqHistoricalData( TickerId id, const Contract &contract,
                                        const IBString &durationStr, 
                                        const IBString &barSizeSetting, 
                                        const IBString &whatToShow, 
-                                       int useRTH, int formatDate ) {
+                                       int useRTH, int formatDate,
+                                       const TagValueListSPtr& chartOptions ) {
     m_pClient->reqHistoricalData( id, contract, endDateTime, durationStr, 
                                   barSizeSetting, whatToShow, useRTH, 
-                                  formatDate );
+                                  formatDate, chartOptions );
 }
 void IbPosixClient::exerciseOptions( TickerId tickerId, 
                                      const Contract &contract, 
@@ -164,8 +174,11 @@ void IbPosixClient::cancelHistoricalData( TickerId tickerId ) {
 }
 void IbPosixClient::reqRealTimeBars( TickerId id, const Contract &contract, 
                                      int barSize, const IBString &whatToShow, 
-                                     bool useRTH ) {
-    m_pClient->reqRealTimeBars( id, contract, barSize, whatToShow, useRTH );
+                                     bool useRTH,
+                                     const TagValueListSPtr& realTimeBarsOptions
+                                      ) {
+    m_pClient->reqRealTimeBars( id, contract, barSize, whatToShow, useRTH,
+                                realTimeBarsOptions );
 }
 void IbPosixClient::cancelRealTimeBars( TickerId tickerId ) {
     m_pClient->cancelRealTimeBars( tickerId );
@@ -177,8 +190,10 @@ void IbPosixClient::reqScannerParameters() {
     m_pClient->reqScannerParameters();
 }
 void IbPosixClient::reqScannerSubscription( int tickerId, 
-        const ScannerSubscription &subscription ) {
-    m_pClient->reqScannerSubscription( tickerId, subscription );
+                        const ScannerSubscription &subscription,
+                        const TagValueListSPtr& scannerSubscriptionOptions ) {
+    m_pClient->reqScannerSubscription( tickerId, subscription,
+                                        scannerSubscriptionOptions );
 }
 void IbPosixClient::reqCurrentTime() {
     m_pClient->reqCurrentTime();
@@ -228,6 +243,26 @@ void IbPosixClient::reqAccountSummary( int reqId, const IBString& groupName,
 }
 void IbPosixClient::cancelAccountSummary( int reqId ) {
     m_pClient->cancelAccountSummary( reqId );
+}
+void IbPosixClient::verifyRequest( const IBString& apiName, 
+                                   const IBString& apiVersion ) {
+    m_pClient->verifyRequest( apiName, apiVersion );
+}
+void IbPosixClient::verifyMessage( const IBString& apiData) {
+    m_pClient->verifyMessage( apiData );
+}
+void IbPosixClient::queryDisplayGroups( int reqId ) {
+    m_pClient->queryDisplayGroups( reqId );
+}
+void IbPosixClient::subscribeToGroupEvents( int reqId, int groupId ) {
+    m_pClient->subscribeToGroupEvents( reqId, groupId );
+}
+void IbPosixClient::updateDisplayGroup( int reqId, 
+                                        const IBString& contractInfo ) {
+    m_pClient->updateDisplayGroup( reqId, contractInfo );
+}
+void IbPosixClient::unsubscribeFromGroupEvents( int reqId ) {
+    m_pClient->unsubscribeFromGroupEvents( reqId );
 }
 
 
@@ -611,12 +646,14 @@ void IbPosixClient::commissionReport(
     this->m_commissionReports.push( newData );
 }
 void IbPosixClient::position( const IBString& account, 
-                              const Contract& contract, int position ) {
+                              const Contract& contract, int position,
+                              double avgCost ) {
     PositionData newData;
     newData.isValid = true;
     newData.account = account;
     newData.contract = contract;
     newData.position = position;
+    newData.avgCost = avgCost;
     this->m_positions.push( newData );
 }
 void IbPosixClient::positionEnd() {
@@ -641,6 +678,33 @@ void IbPosixClient::accountSummaryEnd( int reqId ) {
     newData.isValid = true;
     newData.reqId = reqId;
     this->m_accountSummaryEnd.push( newData );
+}
+void IbPosixClient::verifyMessageAPI( const IBString& apiData ) {
+    VerifyMessageAPIData newData;
+    newData.isValid = true;
+    newData.apiData = apiData;
+    this->m_verifyMessageAPIs.push( newData );
+}
+void IbPosixClient::verifyCompleted( bool isSuccessful, const IBString& errorText) {
+    VerifyCompletedData newData;
+    newData.isValid = true;
+    newData.isSuccessful = isSuccessful;
+    newData.errorText = errorText;
+    this->m_verifyCompleted.push( newData );
+}
+void IbPosixClient::displayGroupList( int reqId, const IBString& groups) {
+    DisplayGroupListData newData;
+    newData.isValid = true;
+    newData.reqId = reqId;
+    newData.groups = groups;
+    this->m_displayGroupLists.push( newData );
+}
+void IbPosixClient::displayGroupUpdated( int reqId, const IBString& contractInfo) {
+    DisplayGroupUpdatedData newData;
+    newData.isValid = true;
+    newData.reqId = reqId;
+    newData.contractInfo = contractInfo;
+    this->m_displayGroupUpdated.push( newData );
 }
 
 TickPriceData IbPosixClient::getTickPrice() {
@@ -1048,6 +1112,46 @@ AccountSummaryEndData IbPosixClient::getAccountSummaryEnd() {
     if ( !this->m_accountSummaryEnd.empty() ) {
         popped = this->m_accountSummaryEnd.front();
         this->m_accountSummaryEnd.pop();
+        return popped;
+    }
+    popped.isValid = false;
+    return popped;
+}
+VerifyMessageAPIData IbPosixClient::getVerifyMessageAPI() {
+    VerifyMessageAPIData popped;
+    if ( !this->m_verifyMessageAPIs.empty() ) {
+        popped = this->m_verifyMessageAPIs.front();
+        this->m_verifyMessageAPIs.pop();
+        return popped;
+    }
+    popped.isValid = false;
+    return popped;
+}
+VerifyCompletedData IbPosixClient::getVerifyCompleted() {
+    VerifyCompletedData popped;
+    if ( !this->m_verifyCompleted.empty() ) {
+        popped = this->m_verifyCompleted.front();
+        this->m_verifyCompleted.pop();
+        return popped;
+    }
+    popped.isValid = false;
+    return popped;
+}
+DisplayGroupListData IbPosixClient::getDisplayGroupList() {
+    DisplayGroupListData popped;
+    if ( !this->m_displayGroupLists.empty() ) {
+        popped = this->m_displayGroupLists.front();
+        this->m_displayGroupLists.pop();
+        return popped;
+    }
+    popped.isValid = false;
+    return popped;
+}
+DisplayGroupUpdatedData IbPosixClient::getDisplayGroupUpdated() {
+    DisplayGroupUpdatedData popped;
+    if ( !this->m_displayGroupUpdated.empty() ) {
+        popped = this->m_displayGroupUpdated.front();
+        this->m_displayGroupUpdated.pop();
         return popped;
     }
     popped.isValid = false;

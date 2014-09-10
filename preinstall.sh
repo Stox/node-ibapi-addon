@@ -6,10 +6,10 @@ then
     mkdir $DIR
 fi
 cd $DIR
-wget http://interactivebrokers.github.io/downloads/twsapi_macunix.970.01.jar
-unzip twsapi_macunix.970.01.jar
-cp ./IBJts/source/posixclient/shared/* .
-cp ./IBJts/source/posixclient/src/* .
+wget http://interactivebrokers.github.io/downloads/twsapi_macunix.971.01.jar
+unzip twsapi_macunix.971.01.jar
+cp ./IBJts/source/PosixClient/Shared/* .
+cp ./IBJts/source/PosixClient/src/* .
 
 if [ "$(uname)" = "Darwin" ]; then
 sed -ie $'4i\\\n#define IB_USE_STD_STRING\n' ./EClientSocketBase.cpp

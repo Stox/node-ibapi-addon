@@ -1,7 +1,7 @@
 node-ibapi-addon
 ================
 
-Interactive Brokers API addon for Node.js compatible with IB API 9.70
+Interactive Brokers API addon for Node.js compatible with IB API 9.71
 
 This addon uses the latest stable Interactive Brokers POSIX C++ API.
 
@@ -12,6 +12,7 @@ For direct JavaScript implementation of IB API for Node.js, please visit Pilwon 
 
 ### Change Notes:
 
+* 2014-09-10 - 0.1.21 - Supports API 9.71
 * 2014-09-09 - 0.1.19 - Adds order.js and placeOrder can use order obj
 * 2014-04-22 - 0.1.17 - Compatibility fix for API 9.70
 * 2014-03-17 - 0.1.13 - Smoother installation to multiple OSes
@@ -143,6 +144,8 @@ The following commands are extended commands in ibapi.js.
 .connect(host,port,clientId)
 .disconnect()
 .isConnected()
+.serverVersion() // returns right away
+.twsConnectionTime() // returns right away
 .reqMktData(reqId, contract, genericTickType, snapShot)
 .cancelMktData(reqId)
 // placeOrder can take either 
@@ -187,6 +190,12 @@ The following commands are extended commands in ibapi.js.
 .cancelPositions()
 .reqAccountSummary( reqId, groupName, tags )
 .cancelAccountSummary(reqId)
+.verifyRequest( apiName, apiVersion )
+.verifyMessage( apiData )
+.queryDisplayGroups( reqId )
+.subscribeToGroupEvents( reqId, groupId )
+.updateDisplayGroup( reqId, contractInfo )
+.unsubscribeFromGroupEvents( reqId )
 ```
 
 ### EWrapper Events
@@ -233,6 +242,10 @@ The following commands are extended commands in ibapi.js.
 .on('positionEnd', function( positionEnd ) )
 .on('accountSummary', function( accountSummary ) )
 .on('accountSummaryEnd', function( accountSummaryEnd ) )
+.on('verifyMessageAPI', function( verifyMessageAPI ) )
+.on('verifyCompleted', function( verifyCompleted ) )
+.on('displayGroupList', function( displayGroupList ) )
+.on('displayGroupUpdated', function( displayGroupUpdated ) )
 .on('nextValidId', function( nextValidId ) )
 
 .on('disconnected', function ())
