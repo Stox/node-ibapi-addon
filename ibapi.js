@@ -1,5 +1,10 @@
 // module for event driven methods
 var addon = require('./build/Release/NodeIbapiAddon');
+var contract = require('./lib/contract');
+var order = require('./lib/order');
+var execution = require('./lib/execution');
+var contractDetails = require('./lib/contractDetails');
+var scannerSubscription = require('./lib/scannerSubscription');
 var events = require ("events");
 var util = require ("util");
 
@@ -219,4 +224,11 @@ addon.NodeIbapi.prototype.connectToIb = function (host,port,clientId) {
     this.emit('connectionFail');
 }
 
-exports = module.exports = addon;
+exports = module.exports = {
+  "addon": addon,
+  "contract": contract,
+  "execution": execution,
+  "scannerSubscription": scannerSubscription,
+  "contractDetails": contractDetails,
+  "order": order
+};
