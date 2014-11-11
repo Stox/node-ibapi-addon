@@ -15,6 +15,10 @@
     "type": "git",
     "url": "git://github.com/dchem/node-ibapi-addon.git"
   },
+  "dependencies": {
+    "async": "*",
+    "async-q": "*"
+  },
   "keywords": [
     "interactive",
     "brokers",
