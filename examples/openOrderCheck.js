@@ -2,9 +2,9 @@
 //  receive the orderStatus, as well as to poll for openOrders.
 // This example will use Node.js's built in event handlers
 
-var addon = require('../ibapi');
-var obj = new addon.NodeIbapi();
-var ibcontract = require('../lib/contract');
+var ibapi = require('../ibapi');
+var ibcontract = ibapi.contract;
+var client = new ibapi.addon.NodeIbapi();
 
 var orderId = -1;
 var counter = 0;
@@ -13,16 +13,16 @@ var ready = false;
 var isOrderPlaced = false;
 
 var processIbMsg = function () {
-  obj.processIbMsg();
+  client.processIbMsg();
 }
 var doReqFunc = function () {
-  obj.doReqFunc();
+  client.doReqFunc();
 }
 var doOpenOrderReq = function () {
-  obj.reqOpenOrders();
+  client.reqOpenOrders();
 }
 var disconnectClient = function () {
-  obj.disconnect();
+  client.disconnect();
 }
 var msftContract = ibcontract.createContract();
 msftContract.symbol = 'MSFT';
@@ -34,27 +34,27 @@ msftContract.currency = 'USD';
 var placeThatOrder = function () {
     console.log('Next valid order Id: %d',orderId);
     console.log("Placing order for MSFT");
-    obj.placeOrder(orderId, msftContract, "BUY", 1000, "LMT", 0.11, 0.11);
+    client.placeOrder(orderId, msftContract, "BUY", 1000, "LMT", 0.11, 0.11);
     orderId = orderId + 1;
     isOrderPlaced = true;
 }
 var cancelPrevOrder = function () {
   if (isOrderPlaced) {
     console.log('canceling order: %d', orderId-1);
-    obj.cancelOrder(orderId-1);
+    client.cancelOrder(orderId-1);
     isOrderPlaced = false;
   }
 }
 
-obj.on('connected', function () {
+client.on('connected', function () {
   console.log('connected');
   setInterval(processIbMsg,0.1);
 })
 .once('nextValidId', function (data) {
   orderId = data.orderId;
-  setInterval(function () {obj.funcQueue.push(doOpenOrderReq);},200);
-  setInterval(function () {obj.funcQueue.push(placeThatOrder);},1000);
-  setInterval(function () {obj.funcQueue.push(cancelPrevOrder);},1000);
+  setInterval(function () {client.funcQueue.push(doOpenOrderReq);},200);
+  setInterval(function () {client.funcQueue.push(placeThatOrder);},1000);
+  setInterval(function () {client.funcQueue.push(cancelPrevOrder);},1000);
   setInterval(doReqFunc,200);
   setTimeout(disconnectClient,9001);
 })
@@ -95,4 +95,4 @@ obj.on('connected', function () {
   process.exit(1);
 })
 
-obj.connectToIb('127.0.0.1',7496,0);
+client.connectToIb('127.0.0.1',7496,0);

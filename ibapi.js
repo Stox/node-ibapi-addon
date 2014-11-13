@@ -225,10 +225,15 @@ addon.NodeIbapi.prototype.connectToIb = function (host,port,clientId) {
 }
 
 exports = module.exports = {
-  "addon": addon,
-  "contract": contract,
-  "execution": execution,
-  "scannerSubscription": scannerSubscription,
-  "contractDetails": contractDetails,
-  "order": order
+  NodeIbapi: function() {
+    console.log("DEPRECATED: calling NodeIbapi() directly from " + 
+      "package is being deprecated. Please call it from " + 
+      "'addon'. See barebones.js in examples folder.");
+    return addon.NodeIbapi;}(),
+  addon: addon,
+  contract: contract,
+  execution: execution,
+  scannerSubscription: scannerSubscription,
+  contractDetails: contractDetails,
+  order: order
 };

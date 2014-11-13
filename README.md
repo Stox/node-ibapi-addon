@@ -9,9 +9,13 @@ Author: Jae Yang - [dchem] (https://github.com/dchem/)
 
 For direct JavaScript implementation of IB API for Node.js, please visit Pilwon Huh's [node-ib] (https://github.com/pilwon/node-ib).
 
+### Important
+DEPRECATED: calling NodeIbapi() directly from package is being deprecated. 
+Please call it from 'addon'. See barebones.js in examples folder.
 
 ### Change Notes:
 
+* 2014-11-12 - 0.1.23 - Includes lib into the package itself
 * 2014-09-10 - 0.1.21 - Supports API 9.71
 * 2014-09-09 - 0.1.19 - Adds order.js and placeOrder can use order obj
 * 2014-04-22 - 0.1.17 - Compatibility fix for API 9.70
@@ -36,8 +40,10 @@ sudo apt-get install unzip
 ### Additional installation dependency for Windows:
 * Install MinGW
 * Install msys-unzip instead of unzip
+* Install msys-wget
 ```
 mingw-get install msys-unzip
+mingw-get install msys-wget
 ```
 * Install Microsoft Visual Studio
 
@@ -55,6 +61,13 @@ For Windows with MSVS 2012:
 ```
 npm install ibapi --msvs_version=2012
 ```
+Alternatively, include GYP_MSVS_VERSION=2012 or GYP_MSVS_VERSION=2013 in 
+environment variables for Windows.
+
+### Additional installation dependency for OS X:
+* Install xcode command line tools
+* Install homebrew
+* Install wget through homebrew
 
 ### Installation from git repo:
 
@@ -73,38 +86,42 @@ npm install ibapi --msvs_version=2012
 
 ### Usage
 1. Require ibapi
-2. Bind processIbMsg to setInterval
-3. Bind doReqFunc to setInterval once nextValidId is received
-4. Define what happens in the callbacks for each events
-5. Push request functions to function queue funcQueue
-6. Invoke connectToIb
-7. ...
-8. Profit!
+2. Create a client
+3. Bind processIbMsg to setInterval
+4. Bind doReqFunc to setInterval once nextValidId is received
+5. Define what happens in the callbacks for each events
+6. Push request functions to function queue funcQueue
+7. Invoke connectToIb
+8. ...
+9. Profit!
 
 ```js
-var addon = require('ibapi');
-var obj = new addon.NodeIbapi();
+var ibapi = require('ibapi');             // 1. Require ibapi
+var client = new ibapi.addon.NodeIbapi(); // 2. Create client
 
 var orderId = -1;
 var processIbMsg = function () {
-  obj.processIbMsg();
+  client.processIbMsg();
 }
 var addReqId = function () {
-  obj.addReqId(1);
+  client.addReqId(1);
 }
 var doReqFunc = function () {
-  obj.doReqFunc();
+  client.doReqFunc();
 }
-obj.on('connected', function () {
+client.on('connected', function () {
   console.log('connected');
-  setInterval(processIbMsg,0.1);
-  obj.funcQueue.push(addReqId);
+  setInterval(processIbMsg,0.1);          // 3. Bind processIbMsg
+  client.funcQueue.push(addReqId);
+
 })
 .once('nextValidId', function (data) {
+  console.log('Server version ' + client.serverVersion().toString() );
   orderId = data.orderId;
   console.log('nextValidId: ' + orderId);
-  setInterval(doReqFunc,100);
-})
+  console.log( client.twsConnectionTime() );
+  setInterval(doReqFunc,100);             // 4. Bind doReqFunc
+})                                        // 5. Bind callbacks to events
 .on('clientError', function (clientError) {
   console.log('Client error' + clientError.id.toString());
 })
@@ -117,9 +134,15 @@ obj.on('connected', function () {
   process.exit(1);
 })
 
-obj.connectToIb('127.0.0.1',7496,0);
-
+client.connectToIb('127.0.0.1',7496,0);   // 7. Connect to IB
 ```
+### Included libraries
+* order
+* contract
+* execution
+* scannerSubscription
+* contractDetails
+
 ### Module Wrapper Commands
 The following commands are extended commands in ibapi.js.
 ```js

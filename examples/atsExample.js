@@ -1,16 +1,16 @@
-var addon = require('../ibapi');
-var obj = new addon.NodeIbapi();
-var ibcontract = require('../lib/contract');
+var ibapi = require('../ibapi');
+var ibcontract = ibapi.contract;
+var client = new ibapi.addon.NodeIbapi();
 
 var orderId = -1;
 var processIbMsg = function () {
-  obj.processIbMsg();
+  client.processIbMsg();
 }
 var addReqId = function () {
-  obj.addReqId(1);
+  client.addReqId(1);
 }
 var doReqFunc = function () {
-  obj.doReqFunc();
+  client.doReqFunc();
 }
 
 var eurusd = ibcontract.createContract();
@@ -23,32 +23,32 @@ eurusd.currency = 'USD';
 var buyOrder = function () {
     console.log('Next valid order Id: %d',orderId);
     console.log("Placing order for EUR");
-    obj.placeOrder(orderId, eurusd, "BUY", 100, "MKT", 0.0);
+    client.placeOrder(orderId, eurusd, "BUY", 100, "MKT", 0.0, 0.0);
     orderId = orderId + 1;
     isOrderPlaced = true;
 }
 var sellOrder = function () {
     console.log('Next valid order Id: %d',orderId);
     console.log("Placing order for EUR");
-    obj.placeOrder(orderId, eurusd, "SELL", 100, "MKT", 1000.0);
+    client.placeOrder(orderId, eurusd, "SELL", 100, "MKT", 1000.0, 0.0);
     orderId = orderId + 1;
     isOrderPlaced = true;
 }
 var subscribeEurUsd = function () {
-  obj.reqMktData(1,eurusd,"165",false);
+  client.reqMktData(1,eurusd,"165",false);
 }
 var priceVec = [];
 
-obj.on('connected', function () {
+client.on('connected', function () {
   console.log('connected');
   setInterval(processIbMsg,0.1);
-  obj.funcQueue.push(addReqId);
+  client.funcQueue.push(addReqId);
 })
 .once('nextValidId', function (data) {
   orderId = data.orderId;
   console.log('nextValidId: ' + orderId);
   setInterval(doReqFunc,21);
-  obj.funcQueue.push(subscribeEurUsd);
+  client.funcQueue.push(subscribeEurUsd);
 })
 .on('tickPrice', function (tickPrice) {
   console.log( "TickPrice: " + tickPrice.tickerId.toString() + " " + 
@@ -67,11 +67,11 @@ obj.on('connected', function () {
     // make  a buy/sell decision
     if (priceVec[2] > priceVec[1] && priceVec[1] > priceVec[0]) {
       // sell
-      obj.funcQueue.push(sellOrder);
+      client.funcQueue.push(sellOrder);
     }
     else if (priceVec[2] < priceVec[1] && priceVec[1] < priceVec[0]) {
       // buy
-      obj.funcQueue.push(buyOrder);
+      client.funcQueue.push(buyOrder);
     }
   }
 })
@@ -87,4 +87,4 @@ obj.on('connected', function () {
   process.exit(1);
 })
 
-obj.connectToIb('127.0.0.1',7496,0);
+client.connectToIb('127.0.0.1',7496,0);
