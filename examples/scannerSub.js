@@ -1,20 +1,19 @@
 // In this example, we will request a scanner subscription and receive the
 //  data from scanner sub.
 
-var addon = require('../ibapi');
-var scanner = require('../lib/scannerSubscription');
-
-var obj = new addon.NodeIbapi();
+var ibapi = require('../ibapi');
+var scanner = ibapi.scannerSubscription;
+var client = new ibapi.addon.NodeIbapi();
 
 var orderId = -1;
 var processIbMsg = function () {
-  obj.processIbMsg();
+  client.processIbMsg();
 }
 var addReqId = function () {
-  obj.addReqId(1);
+  client.addReqId(1);
 }
 var doReqFunc = function () {
-  obj.doReqFunc();
+  client.doReqFunc();
 }
 
 var impVolGainers = scanner.createScannerSub();
@@ -22,14 +21,14 @@ impVolGainers.instrument = "STK";
 impVolGainers.scanCode = "TOP_OPT_IMP_VOLAT_GAIN";
 
 var impVolGainerScan = function () {
-  obj.reqScannerSubscription(1, impVolGainers);  
+  client.reqScannerSubscription(1, impVolGainers);  
 }
 
-obj.on('connected', function () {
+client.on('connected', function () {
   console.log('connected');
   setInterval(processIbMsg,0.1);
-  obj.funcQueue.push(addReqId);
-  obj.funcQueue.push(impVolGainerScan);
+  client.funcQueue.push(addReqId);
+  client.funcQueue.push(impVolGainerScan);
 })
 .once('nextValidId', function (data) {
   orderId = data.orderId;
@@ -55,4 +54,4 @@ obj.on('connected', function () {
   process.exit(1);
 })
 
-obj.connectToIb('127.0.0.1',7496,0);
+client.connectToIb('127.0.0.1',7496,0);

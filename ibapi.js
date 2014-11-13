@@ -225,10 +225,10 @@ addon.NodeIbapi.prototype.connectToIb = function (host,port,clientId) {
 }
 
 exports = module.exports = {
-  "addon": addon,
-  "contract": contract,
-  "execution": execution,
-  "scannerSubscription": scannerSubscription,
-  "contractDetails": contractDetails,
-  "order": order
+  addon: addon,
+  contract: contract,
+  execution: execution,
+  scannerSubscription: scannerSubscription,
+  contractDetails: contractDetails,
+  order: order
 };

@@ -3,21 +3,19 @@
 //  IB Cash Data Server
 // Also, in this example we will submit a market data subscription 
 //  to MSFT.
-// 
 
-var addon = require('../ibapi');
-var obj = new addon.NodeIbapi();
-
-var ibcontract = require('../lib/contract');
+var ibapi = require('../ibapi');
+var ibcontract = ibapi.contract;
+var client = new ibapi.addon.NodeIbapi();
 
 var processIbMsg = function () {
-  obj.processIbMsg();
+  client.processIbMsg();
 }
 var doReqFunc = function () {
-  obj.doReqFunc();
+  client.doReqFunc();
 }
 var disconnectClient = function () {
-  obj.disconnect();
+  client.disconnect();
 }
 
 var eurusd = ibcontract.createContract();
@@ -35,17 +33,17 @@ msftContract.primaryExchange = 'NASDAQ';
 msftContract.currency = 'USD';
 
 var subscribeEurUsd = function () {
-  obj.reqMktData(1,eurusd,"165",false);
+  client.reqMktData(1,eurusd,"165",false);
 }
 var subscribeMsft = function () {
-  obj.reqMktData(3,msftContract,"165",false);
+  client.reqMktData(3,msftContract,"165",false);
 }
 
-obj.on('connected', function () {
+client.on('connected', function () {
   console.log('connected');
   setInterval(processIbMsg,0.1);
-  obj.funcQueue.push(subscribeEurUsd);
-  obj.funcQueue.push(subscribeMsft);
+  client.funcQueue.push(subscribeEurUsd);
+  client.funcQueue.push(subscribeMsft);
 })
 .once('nextValidId', function (data) {
   orderId = data.orderId;
@@ -73,4 +71,4 @@ obj.on('connected', function () {
   process.exit(1);
 })
 
-obj.connectToIb('127.0.0.1',7496,0);
+client.connectToIb('127.0.0.1',7496,0);

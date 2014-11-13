@@ -1,22 +1,22 @@
 // In this example, we will submit orders with different methods
-var addon = require('../ibapi');
-var obj = new addon.NodeIbapi();
-var ibcontract = require('../lib/contract');
-var iborder = require('../lib/order');
+var ibapi = require('../ibapi');
+var ibcontract = ibapi.contract;
+var iborder = ibapi.order;
+var client = new ibapi.addon.NodeIbapi();
 
 var orderId = -1;
 
 var processIbMsg = function () {
-  obj.processIbMsg();
+  client.processIbMsg();
 }
 var addReqId = function () {
-  obj.addReqId(1);
+  client.addReqId(1);
 }
 var doReqFunc = function () {
-  obj.doReqFunc();
+  client.doReqFunc();
 }
 var disconnectClient = function () {
-  obj.disconnect();
+  client.disconnect();
 }
 
 var msftContract1 = ibcontract.createContract();
@@ -34,12 +34,12 @@ msftContract2.exchange = 'SMART';
 // Must have lmtPrice and auxPrice in the arguments
 var placeMsftLmtOrder = function (contract, oId) {
   console.log("Order %d: Placing LMT order for MSFT",oId);
-  obj.placeOrder(oId,contract, 
+  client.placeOrder(oId,contract, 
     "BUY", 1000, "LMT", 0.11, 0.11);
 }
 var placeMsftMitOrder = function (contract, oId) {
   console.log("Order %d: Placing MIT order for MSFT",oId);
-  obj.placeOrder(oId,contract, 
+  client.placeOrder(oId,contract, 
     "BUY", 1000, "MIT", 0.11, 0.11);
 }
 // Now supports using order.js
@@ -52,14 +52,14 @@ var placeOrderUsingLib = function (contract, oId) {
   newOrder.lmtPrice = 0.12;
   newOrder.auxPrice = 0.12;
 
-  obj.placeOrder(oId,contract,newOrder);
+  client.placeOrder(oId,contract,newOrder);
 }
 var cancelPrevOrder = function (oId) {
   console.log('canceling order: %d', oId);
-  obj.cancelOrder(oId);
+  client.cancelOrder(oId);
 }
 
-obj.on('connected', function () {
+client.on('connected', function () {
   console.log('connected');
   setInterval(processIbMsg,0.1);
 })
@@ -73,14 +73,14 @@ obj.on('connected', function () {
 .once('nextValidId', function (data) {
   orderId = data.orderId;
   setInterval(doReqFunc,100);
-  obj.funcQueue.push(placeMsftLmtOrder(msftContract1, orderId));
-  obj.funcQueue.push(cancelPrevOrder(orderId));
+  client.funcQueue.push(placeMsftLmtOrder(msftContract1, orderId));
+  client.funcQueue.push(cancelPrevOrder(orderId));
   orderId = orderId + 1;
-  obj.funcQueue.push(placeMsftMitOrder(msftContract2, orderId));
-  obj.funcQueue.push(cancelPrevOrder(orderId));
+  client.funcQueue.push(placeMsftMitOrder(msftContract2, orderId));
+  client.funcQueue.push(cancelPrevOrder(orderId));
   orderId = orderId + 1;
-  obj.funcQueue.push(placeOrderUsingLib(msftContract2, orderId));
-  obj.funcQueue.push(cancelPrevOrder(orderId));
+  client.funcQueue.push(placeOrderUsingLib(msftContract2, orderId));
+  client.funcQueue.push(cancelPrevOrder(orderId));
   orderId = orderId + 1;
   setTimeout(disconnectClient,9001);
 })
@@ -90,4 +90,4 @@ obj.on('connected', function () {
 })
 
 
-obj.connectToIb('127.0.0.1',7496,0);
+client.connectToIb('127.0.0.1',7496,0);

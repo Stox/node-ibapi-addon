@@ -1,15 +1,14 @@
 // In this example, we will try to submit a realtimeBar request
 
-var addon = require('../ibapi');
-var ibcontract = require('../lib/contract');
-
-var obj = new addon.NodeIbapi();
+var ibapi = require('../ibapi');
+var ibcontract = ibapi.contract;
+var client = new ibapi.addon.NodeIbapi();
 
 var processIbMsg = function () {
-  obj.processIbMsg();
+  client.processIbMsg();
 }
 var doReqFunc = function () {
-  obj.doReqFunc();
+  client.doReqFunc();
 }
 
 var addEurUsd = function () {
@@ -19,7 +18,7 @@ var addEurUsd = function () {
   eurusd.exchange = 'IDEALPRO';
   eurusd.primaryExchange = 'IDEALPRO';
   eurusd.currency = 'USD';
-  obj.reqRealtimeBars(1,eurusd,5,"TRADES",false);
+  client.reqRealtimeBars(1,eurusd,5,"TRADES",false);
 };
 
 var addMsft = function () {
@@ -29,13 +28,13 @@ var addMsft = function () {
   msftContract.exchange = 'SMART';
   msftContract.primaryExchange = 'NASDAQ';
   msftContract.currency = 'USD';
-  obj.reqRealtimeBars(1,msftContract,5,"TRADES",false);
+  client.reqRealtimeBars(1,msftContract,5,"TRADES",false);
 };
 
-obj.on('connected', function () {
+client.on('connected', function () {
   console.log('connected');
-  obj.funcQueue.push(addEurUsd);
-  obj.funcQueue.push(addMsft);
+  client.funcQueue.push(addEurUsd);
+  client.funcQueue.push(addMsft);
   setInterval(processIbMsg,0.1);
 })
 .once('nextValidId', function (data) {
@@ -67,4 +66,4 @@ obj.on('connected', function () {
   process.exit(1);
 })
 
-obj.connectToIb('127.0.0.1',7496,0);
+client.connectToIb('127.0.0.1',7496,0);
