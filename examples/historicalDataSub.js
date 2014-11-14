@@ -1,18 +1,18 @@
 // In this example, we will request and receive a historical market data
 
-var addon = require('../ibapi');
-var obj = new addon.NodeIbapi();
-var ibcontract = require('../lib/contract');
+var ibapi = require('../ibapi');
+var ibcontract = ibapi.contract;
+var client = new ibapi.addon.NodeIbapi();
 
 var orderId = -1;
 var processIbMsg = function () {
-  obj.processIbMsg();
+  client.processIbMsg();
 }
 var addReqId = function () {
-  obj.addReqId(1);
+  client.addReqId(1);
 }
 var doReqFunc = function () {
-  obj.doReqFunc();
+  client.doReqFunc();
 }
 var msftContract = ibcontract.createContract();
 msftContract.symbol = 'MSFT';
@@ -22,14 +22,14 @@ msftContract.primaryExchange = 'NASDAQ';
 msftContract.currency = 'USD';
 
 var subscribeMsft = function () {
-  obj.reqHistoricalData(1,msftContract,"20131001 00:00:00","10 D","1 hour","MIDPOINT","1","1");
+  client.reqHistoricalData(1,msftContract,"20131001 00:00:00","10 D","1 hour","MIDPOINT","1","1");
 }
 
-obj.on('connected', function () {
+client.on('connected', function () {
   console.log('connected');
   setInterval(processIbMsg,0.1);
-  obj.funcQueue.push(addReqId);
-  obj.funcQueue.push(subscribeMsft);
+  client.funcQueue.push(addReqId);
+  client.funcQueue.push(subscribeMsft);
 })
 .once('nextValidId', function (data) {
   orderId = data.orderId;
@@ -60,4 +60,4 @@ obj.on('connected', function () {
   process.exit(1);
 })
 
-obj.connectToIb('127.0.0.1',7496,0);
+client.connectToIb('127.0.0.1',7496,0);
