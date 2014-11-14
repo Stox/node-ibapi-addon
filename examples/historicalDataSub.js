@@ -22,7 +22,7 @@ msftContract.primaryExchange = 'NASDAQ';
 msftContract.currency = 'USD';
 
 var subscribeMsft = function () {
-  client.reqHistoricalData(1,msftContract,"20131001 00:00:00","10 D","1 hour","MIDPOINT","1","1");
+  client.reqHistoricalData(1, msftContract, "20131001 00:00:00", "10 D", "1 hour", "MIDPOINT", "1", "1");
 }
 
 client.on('connected', function () {
@@ -60,4 +60,4 @@ client.on('connected', function () {
   process.exit(1);
 })
 
-client.connectToIb('127.0.0.1',7496,0);
+client.connectToIb('127.0.0.1', 7496, 0);

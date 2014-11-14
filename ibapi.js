@@ -136,11 +136,11 @@ NodeIBApi.prototype = {
     },
 
     cancelMktData: function (reqId) {
-        this.doAction(function () { this.client.cancelMktData(reqId);}.bind(this));
+        this.doAction(function () { this.client.cancelMktData(reqId);});
     },
 
     placeOrder: function (orderId, contrct, order) {
-        this.doAction(function () { this.client.placeOrder(orderId, contrct, order); }.bind(this));
+        this.doAction(function () { this.client.placeOrder(orderId, contrct, order); });
     },
 
     placeOrderDetailed: function (orderId, contract, action, quantity, orderType, price, auxPrice) {
@@ -163,56 +163,158 @@ NodeIBApi.prototype = {
         this.doAction(function () { this.client.reqExecutions(reqId, clientId, acctCode, time, symbol, secType, exchange, side); });
     },
 
-    //
-    //.reqIds(1)
-    //.checkMessages()
-    //.reqContractDetails(reqId, contract)
-    //.reqMktDepth(tickerId, contract, numRows )
-    //.cancelMktDepth(tickerId)
-    //.reqNewsBulletins(allMsgs)
-    //.cancelNewsBulletins()
-    //.setServerLogLevel(level)
-    //.reqAutoOpenOrders(bAutoBind)
-    //.reqAllOpenOrders()
-    //.reqManagedAccts()
-    //.requestFA( ) // not yet implemented
-    //.replaceFA( ) // not yet implemented
-    //.reqHistoricalData(id, contract, endDateTime, durationStr, barSizeSetting, whatToShow, useRTH, formatDate)
-    //.exerciseOptions(tickerId, contract, exerciseAction, exerciseQuantity, account, override )
-    //.cancelHistoricalData(tickerId)
-    //.reqRealtimeBars(tickerId, contract, barSize, whatToShow, useRTH)
-    //.cancelRealTimeBars(tickerId)
-    //.cancelScannerSubscription(tickerId)
-    //.reqScannerParameters()
-    //.reqScannerSubscription(tickerId, subscription)
-    //.reqCurrentTime() // not implemented
-    //.reqFundamentalData( reqId, contract, reportType )
-    //.cancelFundamentalData(reqId)
-    //.calculateImpliedVolatility( reqId, contract, optionPrice, underPrice )
-    //.calculateOptionPrice( reqId, contract, volatility, underPrice )
-    //.cancelCalculateImpliedVolatility(reqId)
-    //.cancelCalculateOptionPrice(reqId)
-    //.reqGlobalCancel()
-    //.reqMarketDataType(marketDataType)
-    //.reqPositions()
-    //.cancelPositions()
-    //.reqAccountSummary( reqId, groupName, tags )
-    //.cancelAccountSummary(reqId)
-    //.verifyRequest( apiName, apiVersion )
-    //.verifyMessage( apiData )
-    //.queryDisplayGroups( reqId )
-    //.subscribeToGroupEvents( reqId, groupId )
-    //.updateDisplayGroup( reqId, contractInfo )
-    //.unsubscribeFromGroupEvents( reqId )
+    checkMessages: function () {
+        this.doAction(function () { this.client.reqExecutions(); });
+    },
+
+    reqContractDetails: function (reqId, contract) {
+        this.doAction(function () { this.client.reqContractDetails(reqId, contract); });
+    },
+
+    reqMktDepth: function (tickerId, contract, numRows) {
+        this.doAction(function () { this.client.reqMktDepth(tickerId, contract, numRows); });
+    },
+
+    cancelMktDepth: function (tickerId) {
+        this.doAction(function () { this.client.reqMktDepth(tickerId); });
+    },
+
+    reqNewsBulletins: function (allMsgs) {
+        this.doAction(function () { this.client.reqMktDepth(allMsgs); });
+    },
+
+    cancelNewsBulletins: function () {
+        this.doAction(function () { this.client.reqMktDepth(); });
+    },
+
+    setServerLogLevel: function (level) {
+        this.doAction(function () { this.client.setServerLogLevel(level); });
+    },
+
+    reqAutoOpenOrders: function (bAutoBind) {
+        this.doAction(function () { this.client.reqAutoOpenOrders(bAutoBind); });
+    },
+
+    reqAllOpenOrders: function () {
+        this.doAction(function () { this.client.reqAllOpenOrders(); });
+    },
+
+    reqManagedAccts: function () {
+        this.doAction(function () { this.client.reqManagedAccts(); });
+    },
+
+    reqHistoricalData: function (id, contract, endDateTime, durationStr, barSizeSetting, whatToShow, useRTH, formatDate) {
+        this.doAction(function () { this.client.reqHistoricalData(id, contract, endDateTime, durationStr, barSizeSetting, whatToShow, useRTH, formatDate); });
+    },
+
+    exerciseOptions: function (tickerId, contract, exerciseAction, exerciseQuantity, account, override) {
+        this.doAction(function () { this.client.exerciseOptions(tickerId, contract, exerciseAction, exerciseQuantity, account, override); });
+    },
+
+    cancelHistoricalData: function (tickerId) {
+        this.doAction(function () { this.client.cancelHistoricalData(tickerId); });
+    },
+
+    reqRealtimeBars: function (tickerId, contract, barSize, whatToShow, useRTH) {
+        this.doAction(function () { this.client.reqRealtimeBars(tickerId, contract, barSize, whatToShow, useRTH); });
+    },
+
+    cancelRealTimeBars: function (tickerId) {
+        this.doAction(function () { this.client.cancelRealTimeBars(tickerId); });
+    },
+
+    cancelScannerSubscription: function (tickerId) {
+        this.doAction(function () { this.client.cancelScannerSubscription(tickerId); });
+    },
+
+    reqScannerParameters: function () {
+        this.doAction(function () { this.client.reqScannerParameters(); });
+    },
+
+    reqScannerSubscription: function (tickerId, subscription) {
+        this.doAction(function () { this.client.reqScannerSubscription(tickerId, subscription); });
+    },
+
+    reqFundamentalData: function (reqId, contract, reportType) {
+        this.doAction(function () { this.client.reqFundamentalData(reqId, contract, reportType); });
+    },
+
+    cancelFundamentalData: function (reqId) {
+        this.doAction(function () { this.client.cancelFundamentalData(reqId); });
+    },
+
+    calculateImpliedVolatility: function (reqId, contract, optionPrice, underPrice) {
+        this.doAction(function () { this.client.calculateImpliedVolatility(reqId, contract, optionPrice, underPrice); });
+    },
+
+    calculateOptionPrice: function (reqId, contract, volatility, underPrice) {
+        this.doAction(function () { this.client.calculateOptionPrice(reqId, contract, volatility, underPrice); });
+    },
+
+    cancelCalculateImpliedVolatility: function (reqId) {
+        this.doAction(function () { this.client.cancelCalculateImpliedVolatility(reqId); });
+    },
+
+    cancelCalculateOptionPrice: function (reqId) {
+        this.doAction(function () { this.client.cancelCalculateOptionPrice(reqId); });
+    },
+
+    reqGlobalCancel: function () {
+        this.doAction(function () { this.client.reqGlobalCancel(); });
+    },
+
+    reqMarketDataType: function (marketDataType) {
+        this.doAction(function () { this.client.reqMarketDataType(marketDataType); });
+    },
+
+    reqPositions: function () {
+        this.doAction(function () { this.client.reqPositions(); });
+    },
+
+    cancelPositions: function () {
+        this.doAction(function () { this.client.cancelPositions(); });
+    },
+
+    reqAccountSummary: function (reqId, groupName, tags) {
+        this.doAction(function () { this.client.reqAccountSummary(reqId, groupName, tags); });
+    },
+
+    cancelAccountSummary: function (reqId) {
+        this.doAction(function () { this.client.cancelAccountSummary(reqId); });
+    },
+
+    verifyRequest: function (apiName, apiVersion) {
+        this.doAction(function () { this.client.verifyRequest(apiName, apiVersion); });
+    },
+
+    verifyMessage: function (apiData) {
+        this.doAction(function () { this.client.verifyMessage(apiData); });
+    },
+
+    queryDisplayGroups: function (reqId) {
+        this.doAction(function () { this.client.queryDisplayGroups(reqId); });
+    },
+
+    subscribeToGroupEvents: function (reqId, groupId) {
+        this.doAction(function () { this.client.subscribeToGroupEvents(reqId, groupId); });
+    },
+
+    updateDisplayGroup: function (reqId, contractInfo) {
+        this.doAction(function () { this.client.updateDisplayGroup(reqId, contractInfo); });
+    },
+
+    unsubscribeFromGroupEvents: function (reqId) {
+        this.doAction(function () { this.client.unsubscribeFromGroupEvents(reqId); });
+    },
+
+    reqIds: function (numIds) {
+        this.doAction(function () { this.client.reqIds(numIds); });
+    },
 
     doAction: function (action) {
         this.limiter.removeTokens(1, function (err, remainingRequests) {
-            action()
-        });
-    },
-
-    addReqId: function () {
-        this.client.reqIds(1);
+            action.bind(this)()
+        }.bind(this));
     }
 
 };

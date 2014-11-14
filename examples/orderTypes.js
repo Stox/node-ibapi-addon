@@ -34,12 +34,12 @@ msftContract2.exchange = 'SMART';
 // Must have lmtPrice and auxPrice in the arguments
 var placeMsftLmtOrder = function (contract, oId) {
   console.log("Order %d: Placing LMT order for MSFT",oId);
-  client.placeOrder(oId,contract, 
+  client.placeOrder(oId, contract,
     "BUY", 1000, "LMT", 0.11, 0.11);
 }
 var placeMsftMitOrder = function (contract, oId) {
   console.log("Order %d: Placing MIT order for MSFT",oId);
-  client.placeOrder(oId,contract, 
+  client.placeOrder(oId, contract,
     "BUY", 1000, "MIT", 0.11, 0.11);
 }
 // Now supports using order.js
@@ -52,7 +52,7 @@ var placeOrderUsingLib = function (contract, oId) {
   newOrder.lmtPrice = 0.12;
   newOrder.auxPrice = 0.12;
 
-  client.placeOrder(oId,contract,newOrder);
+  client.placeOrder(oId, contract, newOrder);
 }
 var cancelPrevOrder = function (oId) {
   console.log('canceling order: %d', oId);
@@ -73,14 +73,14 @@ client.on('connected', function () {
 .once('nextValidId', function (data) {
   orderId = data.orderId;
   setInterval(doReqFunc,100);
-  client.funcQueue.push(placeMsftLmtOrder(msftContract1, orderId));
-  client.funcQueue.push(cancelPrevOrder(orderId));
+      client.funcQueue.push(placeMsftLmtOrder(msftContract1, orderId));
+      client.funcQueue.push(cancelPrevOrder(orderId));
   orderId = orderId + 1;
-  client.funcQueue.push(placeMsftMitOrder(msftContract2, orderId));
-  client.funcQueue.push(cancelPrevOrder(orderId));
+      client.funcQueue.push(placeMsftMitOrder(msftContract2, orderId));
+      client.funcQueue.push(cancelPrevOrder(orderId));
   orderId = orderId + 1;
-  client.funcQueue.push(placeOrderUsingLib(msftContract2, orderId));
-  client.funcQueue.push(cancelPrevOrder(orderId));
+      client.funcQueue.push(placeOrderUsingLib(msftContract2, orderId));
+      client.funcQueue.push(cancelPrevOrder(orderId));
   orderId = orderId + 1;
   setTimeout(disconnectClient,9001);
 })
@@ -89,5 +89,4 @@ client.on('connected', function () {
   process.exit(1);
 })
 
-
-client.connectToIb('127.0.0.1',7496,0);
+client.connectToIb('127.0.0.1', 7496, 0);

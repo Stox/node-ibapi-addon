@@ -54,4 +54,4 @@ client.on('connected', function () {
   process.exit(1);
 })
 
-client.connectToIb('127.0.0.1',7496,0);
+client.connectToIb('127.0.0.1', 7496, 0);

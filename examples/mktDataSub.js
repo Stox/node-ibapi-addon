@@ -33,10 +33,10 @@ msftContract.primaryExchange = 'NASDAQ';
 msftContract.currency = 'USD';
 
 var subscribeEurUsd = function () {
-  client.reqMktData(1,eurusd,"165",false);
+  client.reqMktData(1, eurusd, "165", false);
 }
 var subscribeMsft = function () {
-  client.reqMktData(3,msftContract,"165",false);
+  client.reqMktData(3, msftContract, "165", false);
 }
 
 client.on('connected', function () {
@@ -71,4 +71,4 @@ client.on('connected', function () {
   process.exit(1);
 })
 
-client.connectToIb('127.0.0.1',7496,0);
+client.connectToIb('127.0.0.1', 7496, 0);

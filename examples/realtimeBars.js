@@ -5,10 +5,10 @@ var ibcontract = ibapi.contract;
 var client = new ibapi.addon.NodeIbapi();
 
 var processIbMsg = function () {
-  client.processIbMsg();
+    client.processIbMsg();
 }
 var doReqFunc = function () {
-  client.doReqFunc();
+    client.doReqFunc();
 }
 
 var addEurUsd = function () {
@@ -18,7 +18,7 @@ var addEurUsd = function () {
   eurusd.exchange = 'IDEALPRO';
   eurusd.primaryExchange = 'IDEALPRO';
   eurusd.currency = 'USD';
-  client.reqRealtimeBars(1,eurusd,5,"TRADES",false);
+    client.reqRealtimeBars(1, eurusd, 5, "TRADES", false);
 };
 
 var addMsft = function () {
@@ -28,13 +28,13 @@ var addMsft = function () {
   msftContract.exchange = 'SMART';
   msftContract.primaryExchange = 'NASDAQ';
   msftContract.currency = 'USD';
-  client.reqRealtimeBars(1,msftContract,5,"TRADES",false);
+    client.reqRealtimeBars(1, msftContract, 5, "TRADES", false);
 };
 
 client.on('connected', function () {
   console.log('connected');
-  client.funcQueue.push(addEurUsd);
-  client.funcQueue.push(addMsft);
+    client.funcQueue.push(addEurUsd);
+    client.funcQueue.push(addMsft);
   setInterval(processIbMsg,0.1);
 })
 .once('nextValidId', function (data) {
@@ -66,4 +66,4 @@ client.on('connected', function () {
   process.exit(1);
 })
 
-client.connectToIb('127.0.0.1',7496,0);
+client.connectToIb('127.0.0.1', 7496, 0);
