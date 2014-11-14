@@ -146,22 +146,3 @@ if (connected) {
   setTimeout(api.reqOpenOrders.bind(api), 4000)
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
