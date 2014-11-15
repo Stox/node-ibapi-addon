@@ -9,13 +9,13 @@ var addon = require('./build/Release/NodeIbapiAddon'),
   async = require("async"),
   RateLimiter = require("limiter").RateLimiter;
 
-function NodeIBApi() {
+function NodeIbapi() {
   this.client = new addon.NodeIbapi();
   this.limiter = new RateLimiter(50, 'second');
   this.handlers = {};
 }
 
-NodeIBApi.prototype = {
+NodeIbapi.prototype = {
 
   _consumeMessages: function () {
     var messages = this.processMessage();
