@@ -124,7 +124,7 @@ var handleOpenOrder = function (message, callback) {
   callback();
 };
 
-var api = new addon.NodeIBApi();
+var api = new addon.NodeIbapi();
 
 // Please follow this guideline for event handlers:
 //  1. Add handlers to listen to messages
@@ -140,5 +140,5 @@ var connected = api.connect('127.0.0.1', 7496, 0);
 
 if (connected) {
   api.beginProcessing();
-  setTimeout(api.reqOpenOrders.bind(api), 4000)
+  setTimeout(api.reqOpenOrders.bind(api), 4000);
 }
