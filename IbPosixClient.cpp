@@ -369,14 +369,12 @@ void IbPosixClient::orderStatus( OrderId orderId, const IBString &status,
     this->m_orderStatuses.push( newData );
 }
 // No idea how to handle contract and order
-void IbPosixClient::openOrder( OrderId orderId, const Contract& contract, const Order& order,
+void IbPosixClient::openOrder( OrderId orderId, const Contract&, const Order&, 
                                const OrderState& ostate ) {
     OpenOrderData newData;
     newData.isValid = true;
     newData.orderId = orderId;
     newData.orderState = ostate;
-    newData.order = order;
-    newData.contract = contract;
     this->m_openOrders.push( newData );
 }
 void IbPosixClient::openOrderEnd() {

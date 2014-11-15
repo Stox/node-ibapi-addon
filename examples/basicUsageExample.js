@@ -39,8 +39,7 @@ function createReplaceOrder() {
     newOrder.lmtPrice = 109;
 
     api.placeOrder(orderId, msftContract1, newOrder);
-  }, 3000)
-
+  }, 3000);
 }
 
 function createIocOrder() {
@@ -96,7 +95,6 @@ function createLimitOrder() {
 }
 
 function reqExecutions() {
-
   api.reqExecutions(2);
 }
 
@@ -104,36 +102,35 @@ var handleValidOrderId = function (message, callback) {
   orderId = message.orderId;
   createMarketOrder();
   console.log('next order Id is ' + orderId);
-  callback()
-
+  callback();
 };
 
 var handleServerError = function (message, callback) {
-  console.log('Error: ' + message.id.toString() + ' - ' +
-              message.errorCode.toString() + ' - ' + message.errorString.toString());
-  callback()
-
+  console.log('Error: ' + message.id.toString() + '-' +
+              message.errorCode.toString() + '-' +
+              message.errorString.toString());
+  callback();
 };
 
 var handleOrderStatus = function (message, callback) {
-
   console.log(JSON.stringify(message));
-
-  callback()
+  callback();
 };
 
 var handleOpenOrder = function (message, callback) {
 
   console.log(JSON.stringify(message))
 
-  callback()
+  callback();
 };
 
 var api = new addon.NodeIBApi();
 
-//add handlers to listen to messages
-//each handler must have be a function (message, callback) signature
-//each handler must call the callback() to signal that processing finished
+// Please follow this guideline for event handlers:
+//  1. Add handlers to listen to messages
+//  2. Each handler must have be a function (message, callback) signature
+//  3. Each handler must call the callback() to signal that processing
+//     finished
 api.handlers[messageIds.nextValidId] = handleValidOrderId;
 api.handlers[messageIds.svrError] = handleServerError;
 api.handlers[messageIds.orderStatus] = handleOrderStatus;
@@ -144,5 +141,4 @@ var connected = api.connect('127.0.0.1', 7496, 0);
 if (connected) {
   api.beginProcessing();
   setTimeout(api.reqOpenOrders.bind(api), 4000)
-
 }

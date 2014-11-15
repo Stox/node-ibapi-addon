@@ -1183,10 +1183,6 @@ Handle<Value> NodeIbapi::OpenOrder( const Arguments &args ) {
         String::New( newOpenOrder.orderState.commissionCurrency.c_str() ) );
     retOpenOrder->Set( String::NewSymbol( "warningText" ), 
         String::New( newOpenOrder.orderState.warningText.c_str() ) );
-
-    retOpenOrder->Set( String::NewSymbol( "limitPrice" ),
-        Number::New( newOpenOrder.order.lmtPrice ) );
-
     return scope.Close( retOpenOrder );
 }
 Handle<Value> NodeIbapi::OpenOrderEnd( const Arguments &args ) {
