@@ -111,7 +111,7 @@ private:
     static Handle<Value> ScannerData( const Arguments& args );
     static Handle<Value> ScannerDataEnd( const Arguments& args );
     static Handle<Value> RealtimeBar( const Arguments& args );
-    // static Handle<Value> CurrentTime( const Arguments& args );
+    static Handle<Value> CurrentTime( const Arguments& args );
     static Handle<Value> FundamentalData( const Arguments& args );
     static Handle<Value> DeltaNeutralValidation( const Arguments& args );
     static Handle<Value> TickSnapshotEnd( const Arguments& args );

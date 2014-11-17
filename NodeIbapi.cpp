@@ -27,6 +27,8 @@ void NodeIbapi::Init( Handle<Object> exports ) {
     /// getters
     tpl->PrototypeTemplate()->Set( String::NewSymbol( "getTickPrice" ), 
         FunctionTemplate::New( TickPrice )->GetFunction() );
+    tpl->PrototypeTemplate()->Set( String::NewSymbol( "getCurrentTime" ),
+        FunctionTemplate::New( CurrentTime )->GetFunction() );
     tpl->PrototypeTemplate()->Set( String::NewSymbol( "getTickSize" ), 
         FunctionTemplate::New( TickSize )->GetFunction() );
     tpl->PrototypeTemplate()->Set( String::NewSymbol( "getTickOptionComputation" ), 
@@ -977,11 +979,20 @@ Handle<Value> NodeIbapi::UnsubscribeFromGroupEvents( const Arguments& args ) {
 ///////////////////////////////////////////////////////////////////////////////
 
 
-// Handle<Value> NodeIbapi::CurrentTime( const Arguments &args ) {
-//     HandleScope scope;
-//     NodeIbapi* obj = ObjectWrap::Unwrap<NodeIbapi>( args.This() );
-//     return scope.Close( String::New( obj->m_client.getCurrentTime().c_str() ) );
-// }
+Handle<Value> NodeIbapi::CurrentTime( const Arguments &args ) {
+    HandleScope scope;
+    NodeIbapi* obj = ObjectWrap::Unwrap<NodeIbapi>( args.This() );
+
+    CurrentTimeData newCurrentTime;
+    newCurrentTime = obj->m_client.getCurrentTime();
+
+    Handle<Object> retCurrentTime = Object::New();
+    retCurrentTime->Set( String::NewSymbol( "isValid" ),
+                        Boolean::New( newCurrentTime.isValid ) );
+    retCurrentTime->Set( String::NewSymbol( "time" ),
+                    Integer::New( newCurrentTime.time ) );
+    return scope.Close( retCurrentTime );
+}
 
 Handle<Value> NodeIbapi::TickPrice( const Arguments &args ) {
     HandleScope scope;
@@ -1649,7 +1660,6 @@ Handle<Value> NodeIbapi::RealtimeBar( const Arguments &args ) {
                          Integer::New( newRealtimeBar.count ) );
     return scope.Close( retRealtimeBar );
 }
-// TODO currentTime
 Handle<Value> NodeIbapi::FundamentalData( const Arguments &args ) {
     HandleScope scope;
     NodeIbapi* obj = ObjectWrap::Unwrap<NodeIbapi>( args.This() );

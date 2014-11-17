@@ -99,6 +99,7 @@ NodeIBApi.prototype = {
     checkMessage(messageIds.verifyCompleted, this.client.getVerifyCompleted());
     checkMessage(messageIds.displayGroupList, this.client.getDisplayGroupList());
     checkMessage(messageIds.displayGroupUpdated, this.client.getDisplayGroupUpdated());
+    checkMessage(messageIds.currentTime, this.client.getCurrentTime());
 
     if (!this.client.isConnected()) {
       messages[messageIds.disconnected] = {};
@@ -309,6 +310,10 @@ NodeIBApi.prototype = {
 
   reqIds: function (numIds) {
     this.doAction(function () { this.client.reqIds(numIds); });
+  },
+
+  reqCurrentTime: function () {
+    this.doAction(function () { this.client.reqCurrentTime(); });
   },
 
   doAction: function (action) {

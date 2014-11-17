@@ -211,7 +211,7 @@ public:
     ScannerDataData getScannerData(); 
     ScannerDataEndData getScannerDataEnd(); 
     RealtimeBarData getRealtimeBar(); 
-    // std::string geturrentTime() ;
+    CurrentTimeData getCurrentTime() ;
     FundamentalDataData getFundamentalData(); 
     DeltaNeutralValidationData getDeltaNeutralValidation(); 
     TickSnapshotEndData getTickSnapshotEnd(); 
@@ -263,7 +263,7 @@ private:
     std::queue< ScannerDataData > m_scannerData;
     std::queue< ScannerDataEndData > m_scannerDataEnd;
     std::queue< RealtimeBarData > m_realtimeBars;
-    // std::string m_currentTime;
+    std::queue< CurrentTimeData > m_currentTime;
     std::queue< FundamentalDataData > m_fundamentalData;
     std::queue< DeltaNeutralValidationData > m_deltaNeutralValidations;
     std::queue< TickSnapshotEndData > m_tickSnapshotEnds;
