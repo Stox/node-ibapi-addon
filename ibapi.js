@@ -114,6 +114,7 @@ NodeIbapi.prototype = {
                  this.client.getDisplayGroupList());
     checkMessage(messageIds.displayGroupUpdated,
                  this.client.getDisplayGroupUpdated());
+    checkMessage(messageIds.currentTime, this.client.getCurrentTime());
 
     if (!this.client.isConnected()) {
       messages[messageIds.disconnected] = {};
@@ -431,6 +432,10 @@ NodeIbapi.prototype = {
     this.doAction( function () {
       this.client.reqIds(numIds);
     });
+  },
+
+  reqCurrentTime: function () {
+    this.doAction(function () { this.client.reqCurrentTime(); });
   },
 
   doAction: function (action) {

@@ -44,7 +44,8 @@ var messageIds = {
   verifyCompleted: 'verifyCompleted',
   displayGroupList: 'displayGroupList',
   displayGroupUpdated: 'displayGroupUpdated',
-  disconnected: 'disconnected'
+  disconnected: 'disconnected',
+  currentTime: 'currentTime'
 };
 
 module.exports = messageIds;
