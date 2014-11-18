@@ -603,12 +603,10 @@ void IbPosixClient::realtimeBar( TickerId reqId, long itime, double open,
     this->m_realtimeBars.push( newData );
 }
 void IbPosixClient::currentTime( long time ) {
-    time_t t = ( time_t )time;
-    struct tm * timeinfo = localtime ( &t );
-    // this->m_currentTime.clear();
-    std::string currTime( asctime( timeinfo ) );
-    // this->m_currentTime.append( currTime );
-    time_t now = ::time( NULL );
+    CurrentTimeData newData;
+    newData.isValid = true;
+    newData.time = time;
+    this->m_currentTime.push( newData );
 }
 void IbPosixClient::fundamentalData( TickerId reqId, const IBString& data ) {
     FundamentalDataData newData;
@@ -1154,6 +1152,16 @@ DisplayGroupUpdatedData IbPosixClient::getDisplayGroupUpdated() {
         this->m_displayGroupUpdated.pop();
         return popped;
     }
+    popped.isValid = false;
+    return popped;
+}
+CurrentTimeData IbPosixClient::getCurrentTime(){
+    CurrentTimeData popped;
+    if ( !this->m_currentTime.empty() ) {
+            popped = this->m_currentTime.front();
+            this->m_currentTime.pop();
+            return popped;
+        }
     popped.isValid = false;
     return popped;
 }
