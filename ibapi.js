@@ -13,6 +13,7 @@ function NodeIBApi() {
   this.client = new addon.NodeIbapi();
   this.limiter = new RateLimiter(50, 'second');
   this.handlers = {};
+  this.isProcessing=false;
 }
 
 NodeIBApi.prototype = {
@@ -45,8 +46,14 @@ NodeIBApi.prototype = {
 
   processMessage: function () {
     var messages = {};
-    this.client.checkMessages();
+    this.checkMessages();
     this.client.processMsg();
+
+    if (!this.isConnected()) {
+      messages[messageIds.disconnected] = {};
+
+      return messages;
+    }
 
     function checkMessage(messageId, objectData) {
       if (objectData.isValid) {
@@ -101,10 +108,6 @@ NodeIBApi.prototype = {
     checkMessage(messageIds.displayGroupUpdated, this.client.getDisplayGroupUpdated());
     checkMessage(messageIds.currentTime, this.client.getCurrentTime());
 
-    if (!this.client.isConnected()) {
-      messages[messageIds.disconnected] = {};
-    }
-
     return messages;
   },
 
@@ -113,7 +116,10 @@ NodeIBApi.prototype = {
   },
 
   beginProcessing: function () {
-    this._consumeMessages();
+    if (!this.isProcessing) {
+      this._consumeMessages();
+      this.isProcessing = true;
+    }
   },
 
   disconnect: function () {
@@ -165,7 +171,7 @@ NodeIBApi.prototype = {
   },
 
   checkMessages: function () {
-    this.doAction(function () { this.client.reqExecutions(); });
+    this.doAction(function () { this.client.checkMessages(); });
   },
 
   reqContractDetails: function (reqId, contract) {
