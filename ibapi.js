@@ -49,11 +49,7 @@ NodeIBApi.prototype = {
     this.checkMessages();
     this.client.processMsg();
 
-    if (!this.isConnected()) {
-      messages[messageIds.disconnected] = {};
 
-      return messages;
-    }
 
     function checkMessage(messageId, objectData) {
       if (objectData.isValid) {
@@ -107,6 +103,10 @@ NodeIBApi.prototype = {
     checkMessage(messageIds.displayGroupList, this.client.getDisplayGroupList());
     checkMessage(messageIds.displayGroupUpdated, this.client.getDisplayGroupUpdated());
     checkMessage(messageIds.currentTime, this.client.getCurrentTime());
+
+    if (!this.isConnected()) {
+      messages[messageIds.disconnected] = {};
+    }
 
     return messages;
   },
