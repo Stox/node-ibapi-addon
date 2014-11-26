@@ -21,6 +21,11 @@ NodeIBApi.prototype = {
   _consumeMessages: function () {
     var messages = this.processMessage();
 
+    if(Object.keys(messages).length == 0){
+      setTimeout(this._consumeMessages.bind(this), 25); // sleep a bit
+      return;
+    }
+
     async.eachSeries(Object.keys(messages), function (key, cb) {
 
       if (key in this.handlers) {
