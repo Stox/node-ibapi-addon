@@ -1198,6 +1198,9 @@ Handle<Value> NodeIbapi::OpenOrder( const Arguments &args ) {
     retOpenOrder->Set( String::NewSymbol( "order" ),
             mapOrderToJSOrder(newOpenOrder.order));
 
+    retOpenOrder->Set( String::NewSymbol( "contract" ),
+            convertContractForNode(newOpenOrder.contract));
+
     return scope.Close( retOpenOrder );
 }
 Handle<Value> NodeIbapi::OpenOrderEnd( const Arguments &args ) {
