@@ -1170,30 +1170,35 @@ Handle<Value> NodeIbapi::OpenOrder( const Arguments &args ) {
 
     OpenOrderData newOpenOrder;
     newOpenOrder = obj->m_client.getOpenOrder();
-
     Handle<Object> retOpenOrder = Object::New();
-    retOpenOrder->Set( String::NewSymbol( "isValid" ), 
+
+    retOpenOrder->Set( String::NewSymbol( "isValid" ),
                      Boolean::New( newOpenOrder.isValid ) );
-    retOpenOrder->Set( String::NewSymbol( "orderId" ), 
+    retOpenOrder->Set( String::NewSymbol( "orderId" ),
                        Integer::New( newOpenOrder.orderId ) );
-    retOpenOrder->Set( String::NewSymbol( "status" ), 
+
+    Handle<Object> orderState = Object::New();
+    orderState->Set( String::NewSymbol( "status" ),
                        String::New( newOpenOrder.orderState.status.c_str() ) );
-    retOpenOrder->Set( String::NewSymbol( "initMargin" ), 
+    orderState->Set( String::NewSymbol( "initMargin" ),
         String::New( newOpenOrder.orderState.initMargin.c_str() ) );
-    retOpenOrder->Set( String::NewSymbol( "maintMargin" ), 
+    orderState->Set( String::NewSymbol( "maintMargin" ),
         String::New( newOpenOrder.orderState.maintMargin.c_str() ) );
-    retOpenOrder->Set( String::NewSymbol( "equityWithLoan" ), 
+    orderState->Set( String::NewSymbol( "equityWithLoan" ),
         String::New( newOpenOrder.orderState.equityWithLoan.c_str() ) );
-    retOpenOrder->Set( String::NewSymbol( "commission" ), 
+    orderState->Set( String::NewSymbol( "commission" ),
         Number::New( newOpenOrder.orderState.commission) );
-    retOpenOrder->Set( String::NewSymbol( "minCommission" ), 
+    orderState->Set( String::NewSymbol( "minCommission" ),
         Number::New( newOpenOrder.orderState.minCommission) );
-    retOpenOrder->Set( String::NewSymbol( "maxCommission" ), 
+    orderState->Set( String::NewSymbol( "maxCommission" ),
         Number::New( newOpenOrder.orderState.maxCommission) );
-    retOpenOrder->Set( String::NewSymbol( "commissionCurrency" ), 
+    orderState->Set( String::NewSymbol( "commissionCurrency" ),
         String::New( newOpenOrder.orderState.commissionCurrency.c_str() ) );
-    retOpenOrder->Set( String::NewSymbol( "warningText" ), 
+    orderState->Set( String::NewSymbol( "warningText" ),
         String::New( newOpenOrder.orderState.warningText.c_str() ) );
+
+    retOpenOrder->Set( String::NewSymbol( "orderState" ),
+            orderState);
 
     retOpenOrder->Set( String::NewSymbol( "order" ),
             mapOrderToJSOrder(newOpenOrder.order));
