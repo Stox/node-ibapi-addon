@@ -2381,6 +2381,8 @@ Handle<Object> NodeIbapi::mapOrderToJSOrder(  Order &order ) {
                           Integer::New( order.volatilityType));
     ibOrder->Set( String::New( "deltaNeutralOrderType" ),
                           String::New( order.deltaNeutralOrderType.c_str()));
+    ibOrder->Set( String::New( "deltaNeutralAuxPrice" ),
+                          Number::New( order.deltaNeutralAuxPrice));
     ibOrder->Set( String::New( "deltaNeutralConId" ),
                           Integer::New( order.deltaNeutralConId));
     ibOrder->Set( String::New( "deltaNeutralSettlingFirm" ),
