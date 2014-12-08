@@ -134,6 +134,7 @@ private:
     static void convertContractForIb( Handle<Object> ibContract, 
                                       Contract &contract );
     static Handle<Object> convertContractForNode( Contract &contract );
+    static Handle<Object> mapOrderToJSOrder(  Order &order );
     static void convertSubForIb( Handle<Object> scannerSub, 
                                  ScannerSubscription &subscription );
     static Handle<Object> convertContDetailForNode( ContractDetails &contDet );

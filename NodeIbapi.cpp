@@ -1170,30 +1170,42 @@ Handle<Value> NodeIbapi::OpenOrder( const Arguments &args ) {
 
     OpenOrderData newOpenOrder;
     newOpenOrder = obj->m_client.getOpenOrder();
-
     Handle<Object> retOpenOrder = Object::New();
-    retOpenOrder->Set( String::NewSymbol( "isValid" ), 
+
+    retOpenOrder->Set( String::NewSymbol( "isValid" ),
                      Boolean::New( newOpenOrder.isValid ) );
-    retOpenOrder->Set( String::NewSymbol( "orderId" ), 
+    retOpenOrder->Set( String::NewSymbol( "orderId" ),
                        Integer::New( newOpenOrder.orderId ) );
-    retOpenOrder->Set( String::NewSymbol( "status" ), 
+
+    Handle<Object> orderState = Object::New();
+    orderState->Set( String::NewSymbol( "status" ),
                        String::New( newOpenOrder.orderState.status.c_str() ) );
-    retOpenOrder->Set( String::NewSymbol( "initMargin" ), 
+    orderState->Set( String::NewSymbol( "initMargin" ),
         String::New( newOpenOrder.orderState.initMargin.c_str() ) );
-    retOpenOrder->Set( String::NewSymbol( "maintMargin" ), 
+    orderState->Set( String::NewSymbol( "maintMargin" ),
         String::New( newOpenOrder.orderState.maintMargin.c_str() ) );
-    retOpenOrder->Set( String::NewSymbol( "equityWithLoan" ), 
+    orderState->Set( String::NewSymbol( "equityWithLoan" ),
         String::New( newOpenOrder.orderState.equityWithLoan.c_str() ) );
-    retOpenOrder->Set( String::NewSymbol( "commission" ), 
+    orderState->Set( String::NewSymbol( "commission" ),
         Number::New( newOpenOrder.orderState.commission) );
-    retOpenOrder->Set( String::NewSymbol( "minCommission" ), 
+    orderState->Set( String::NewSymbol( "minCommission" ),
         Number::New( newOpenOrder.orderState.minCommission) );
-    retOpenOrder->Set( String::NewSymbol( "maxCommission" ), 
+    orderState->Set( String::NewSymbol( "maxCommission" ),
         Number::New( newOpenOrder.orderState.maxCommission) );
-    retOpenOrder->Set( String::NewSymbol( "commissionCurrency" ), 
+    orderState->Set( String::NewSymbol( "commissionCurrency" ),
         String::New( newOpenOrder.orderState.commissionCurrency.c_str() ) );
-    retOpenOrder->Set( String::NewSymbol( "warningText" ), 
+    orderState->Set( String::NewSymbol( "warningText" ),
         String::New( newOpenOrder.orderState.warningText.c_str() ) );
+
+    retOpenOrder->Set( String::NewSymbol( "orderState" ),
+            orderState);
+
+    retOpenOrder->Set( String::NewSymbol( "order" ),
+            mapOrderToJSOrder(newOpenOrder.order));
+
+    retOpenOrder->Set( String::NewSymbol( "contract" ),
+            convertContractForNode(newOpenOrder.contract));
+
     return scope.Close( retOpenOrder );
 }
 Handle<Value> NodeIbapi::OpenOrderEnd( const Arguments &args ) {
@@ -2260,5 +2272,182 @@ void NodeIbapi::convertOrderForIb( Handle<Object> ibOrder, Order &order ) {
     // What-if
 
     // Not Held
+}
+
+Handle<Object> NodeIbapi::mapOrderToJSOrder(  Order &order ) {
+
+    Handle<Object> ibOrder = Object::New();
+        // order identifier
+    ibOrder->Set( String::New( "orderId" ),
+                  Integer::New( order.orderId ));
+    ibOrder->Set( String::New( "clientId" ) ,
+                  Integer::New( order.clientId ));
+    ibOrder->Set( String::New( "permId" ) ,
+                  Integer::New( order.permId ));
+
+    // main order fields
+    ibOrder->Set( String::New( "action" ) ,
+                  String::New(order.action.c_str()));
+    ibOrder->Set( String::New( "totalQuantity" ),
+                  Integer::New( order.totalQuantity ));
+    ibOrder->Set( String::New( "orderType" ),
+                  String::New( order.orderType.c_str() ));
+
+    ibOrder->Set( String::New( "lmtPrice" ),
+                  Number::New( order.lmtPrice ));
+
+    ibOrder->Set( String::New( "auxPrice" ),
+                  Number::New( order.auxPrice));
+
+     // extended order fields
+    ibOrder->Set( String::New( "tif" ),
+                  String::New( order.tif.c_str() ));
+    ibOrder->Set( String::New( "ocaGroup" ),
+                  String::New( order.ocaGroup.c_str() ));
+    ibOrder->Set( String::New( "ocaType" ),
+                  Integer::New( order.ocaType ));
+    ibOrder->Set( String::New( "orderRef" ),
+                  String::New( order.orderRef.c_str() ));
+    ibOrder->Set( String::New( "transmit" ),
+                  Boolean::New( order.transmit));
+    ibOrder->Set( String::New( "parentId" ),
+                  Integer::New( order.parentId));
+    ibOrder->Set( String::New( "blockOrder" ),
+                  Boolean::New( order.blockOrder));
+    ibOrder->Set( String::New( "sweepToFill" ),
+                  Boolean::New( order.sweepToFill));
+    ibOrder->Set( String::New( "displaySize" ),
+                  Integer::New( order.displaySize));
+    ibOrder->Set( String::New( "triggerMethod" ),
+                  Integer::New( order.triggerMethod));
+    ibOrder->Set( String::New( "outsideRth" ),
+                  Boolean::New( order.outsideRth));
+    ibOrder->Set( String::New( "hidden" ),
+                  Boolean::New( order.hidden));
+    ibOrder->Set( String::New( "goodAfterTime" ),
+                  String::New( order.goodAfterTime.c_str()));
+    ibOrder->Set( String::New( "rule80A" ),
+                  String::New( order.rule80A.c_str()));
+    ibOrder->Set( String::New( "allOrNone" ),
+                  Boolean::New( order.allOrNone));
+    ibOrder->Set( String::New( "minQty" ),
+                  Integer::New( order.minQty));
+    ibOrder->Set( String::New( "percentOffset" ),
+                  Number::New( order.percentOffset));
+    ibOrder->Set( String::New( "overridePercentageConstraints" ),
+                  Boolean::New( order.overridePercentageConstraints));
+    ibOrder->Set( String::New( "trailStopPrice" ),
+                  Number::New( order.trailStopPrice));
+    ibOrder->Set( String::New( "trailingPercent" ),
+                  Number::New( order.trailingPercent));
+
+    // financial advisors only
+
+    // institutional (ie non-cleared) only
+
+    // SMART routing only
+    ibOrder->Set( String::New( "discretionaryAmt" ),
+                      Number::New( order.discretionaryAmt));
+    ibOrder->Set( String::New( "eTradeOnly" ),
+                      Boolean::New( order.eTradeOnly));
+    ibOrder->Set( String::New( "firmQuoteOnly" ),
+                      Boolean::New( order.firmQuoteOnly));
+    ibOrder->Set( String::New( "nbboPriceCap" ),
+                      Number::New( order.nbboPriceCap));
+    ibOrder->Set( String::New( "optOutSmartRouting" ),
+                      Boolean::New( order.optOutSmartRouting));
+
+    // BOX exchange orders only
+    ibOrder->Set( String::New( "auctionStrategy" ),
+                      Integer::New( order.auctionStrategy));
+    ibOrder->Set( String::New( "startingPrice" ),
+                      Number::New( order.startingPrice));
+    ibOrder->Set( String::New( "stockRefPrice" ),
+                      Number::New( order.stockRefPrice));
+    ibOrder->Set( String::New( "delta" ),
+                      Number::New( order.delta));
+
+    // pegged to stock and VOL orders only
+
+    ibOrder->Set( String::New( "stockRangeLower" ),
+                      Number::New( order.stockRangeLower));
+    ibOrder->Set( String::New( "stockRangeUpper" ),
+                      Number::New( order.stockRangeUpper));
+
+    // VOLATILITY ORDERS ONLY
+    ibOrder->Set( String::New( "volatility" ),
+                          Number::New( order.volatility));
+    ibOrder->Set( String::New( "volatilityType" ),
+                          Integer::New( order.volatilityType));
+    ibOrder->Set( String::New( "deltaNeutralOrderType" ),
+                          String::New( order.deltaNeutralOrderType.c_str()));
+    ibOrder->Set( String::New( "deltaNeutralAuxPrice" ),
+                          Number::New( order.deltaNeutralAuxPrice));
+    ibOrder->Set( String::New( "deltaNeutralConId" ),
+                          Integer::New( order.deltaNeutralConId));
+    ibOrder->Set( String::New( "deltaNeutralSettlingFirm" ),
+                          String::New( order.deltaNeutralSettlingFirm.c_str()));
+    ibOrder->Set( String::New( "deltaNeutralClearingAccount" ),
+                          String::New( order.deltaNeutralClearingAccount.c_str()));
+    ibOrder->Set( String::New( "deltaNeutralClearingIntent" ),
+                          String::New( order.deltaNeutralClearingIntent.c_str()));
+    ibOrder->Set( String::New( "deltaNeutralOpenClose" ),
+                          String::New( order.deltaNeutralOpenClose.c_str()));
+    ibOrder->Set( String::New( "deltaNeutralShortSale" ),
+                          Boolean::New( order.deltaNeutralShortSale));
+    ibOrder->Set( String::New( "deltaNeutralShortSaleSlot" ),
+                          Integer::New( order.deltaNeutralShortSaleSlot));
+    ibOrder->Set( String::New( "deltaNeutralDesignatedLocation" ),
+                          String::New( order.deltaNeutralDesignatedLocation.c_str()));
+    ibOrder->Set( String::New( "continuousUpdate" ),
+                          Boolean::New( order.continuousUpdate));
+    ibOrder->Set( String::New( "referencePriceType" ),
+                          Integer::New( order.referencePriceType));
+    // COMBO ORDERS ONLY
+
+    // SCALE ORDERS ONLY
+    ibOrder->Set( String::New( "scaleInitLevelSize" ),
+                          Integer::New( order.scaleInitLevelSize));
+    ibOrder->Set( String::New( "scaleSubsLevelSize" ),
+                          Integer::New( order.scaleSubsLevelSize));
+    ibOrder->Set( String::New( "scalePriceIncrement" ),
+                          Number::New( order.scalePriceIncrement));
+    ibOrder->Set( String::New( "scalePriceAdjustValue" ),
+                          Number::New( order.scalePriceAdjustValue));
+    ibOrder->Set( String::New( "scalePriceAdjustInterval" ),
+                          Integer::New( order.scalePriceAdjustInterval));
+    ibOrder->Set( String::New( "scaleProfitOffset" ),
+                          Number::New( order.scaleProfitOffset));
+    ibOrder->Set( String::New( "scaleAutoReset" ),
+                          Boolean::New( order.scaleAutoReset));
+    ibOrder->Set( String::New( "scaleInitPosition" ),
+                          Integer::New( order.scaleInitPosition));
+    ibOrder->Set( String::New( "scaleInitFillQty" ),
+                          Integer::New( order.scaleInitFillQty));
+    ibOrder->Set( String::New( "scaleRandomPercent" ),
+                          Boolean::New( order.scaleRandomPercent));
+
+    // HEDGE ORDERS
+    ibOrder->Set( String::New( "hedgeType" ),
+                          String::New( order.hedgeType.c_str()));
+    ibOrder->Set( String::New( "hedgeParam" ),
+                          String::New( order.hedgeParam.c_str()));
+
+    // Clearing info
+    ibOrder->Set( String::New( "account" ),
+                  String::New( order.account.c_str()));
+    ibOrder->Set( String::New( "settlingFirm" ),
+                  String::New( order.settlingFirm.c_str()));
+    ibOrder->Set( String::New( "clearingAccount" ),
+                  String::New( order.clearingAccount.c_str()));
+    ibOrder->Set( String::New( "clearingIntent" ),
+                  String::New( order.clearingIntent.c_str()));
+    // ALGO ORDERS ONLY
+
+    // What-if
+
+    // Not Held
+
+    return ibOrder;
 }
 
