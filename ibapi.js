@@ -13,12 +13,18 @@ function NodeIbapi() {
   this.client = new addon.NodeIbapi();
   this.limiter = new RateLimiter(50, 'second');
   this.handlers = {};
+  this.isProcessing=false;
 }
 
 NodeIbapi.prototype = {
 
   _consumeMessages: function () {
     var messages = this.processMessage();
+
+    if(Object.keys(messages).length == 0){
+      setTimeout(this._consumeMessages.bind(this), 25); // sleep a bit
+      return;
+    }
 
     async.eachSeries(Object.keys(messages), function (key, cb) {
       if (key in this.handlers) {
@@ -38,8 +44,10 @@ NodeIbapi.prototype = {
 
   processMessage: function () {
     var messages = {};
-    this.client.checkMessages();
+    this.checkMessages();
     this.client.processMsg();
+
+
 
     function checkMessage(messageId, objectData) {
       if (objectData.isValid) {
@@ -116,7 +124,7 @@ NodeIbapi.prototype = {
                  this.client.getDisplayGroupUpdated());
     checkMessage(messageIds.currentTime, this.client.getCurrentTime());
 
-    if (!this.client.isConnected()) {
+    if (!this.isConnected()) {
       messages[messageIds.disconnected] = {};
     }
 
@@ -128,7 +136,10 @@ NodeIbapi.prototype = {
   },
 
   beginProcessing: function () {
-    this._consumeMessages();
+    if (!this.isProcessing) {
+      this._consumeMessages();
+      this.isProcessing = true;
+    }
   },
 
   disconnect: function () {
@@ -202,9 +213,7 @@ NodeIbapi.prototype = {
   },
 
   checkMessages: function () {
-    this.doAction( function () {
-      this.client.reqExecutions();
-    });
+    this.doAction( function () { this.client.checkMessages(); });
   },
 
   reqContractDetails: function (reqId, contract) {
