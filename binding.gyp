@@ -18,13 +18,8 @@
           },
         }],
         ['OS=="win"', {
-          'libraries': ['-llibjson.lib']
         }],
         ['OS!="win"', {
-          'link_settings': {
-            'libraries': ['libjson.a',],
-            'library_dirs': ['../import/libjson',],
-          },
         }],
       ]
     }

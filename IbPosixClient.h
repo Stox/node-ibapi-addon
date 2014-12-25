@@ -279,6 +279,15 @@ private:
     std::queue< VerifyCompletedData > m_verifyCompleted;
     std::queue< DisplayGroupListData > m_displayGroupLists;
     std::queue< DisplayGroupUpdatedData > m_displayGroupUpdated;
+
+//// helper methods
+    JSONNode jsonifyContract(std::string name, const Contract& contract);
+    JSONNode jsonifyUnderComp(const UnderComp& underComp);
+    JSONNode jsonifyContractDetails(const ContractDetails& cd);
+    JSONNode jsonifyOrder(const Order& order);
+    JSONNode jsonifyOrderState(const OrderState& ostate);
+    JSONNode jsonifyExecution(const Execution& execution);
+    JSONNode jsonifyCommissionReport(const CommissionReport& cr);
 };
 
 #endif

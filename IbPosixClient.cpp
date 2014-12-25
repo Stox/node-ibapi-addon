@@ -370,12 +370,15 @@ void IbPosixClient::orderStatus( OrderId orderId, const IBString &status,
     this->m_inboundMsgs.push( n );
 }
 // No idea how to handle contract and order
-void IbPosixClient::openOrder( OrderId orderId, const Contract&, const Order&, 
+void IbPosixClient::openOrder( OrderId orderId, const Contract& contract,
+                               const Order& order, 
                                const OrderState& ostate ) {
     JSONNode n( JSON_NODE );
     n.push_back( JSONNode( "messageId", "openOrder" ) );
     n.push_back( JSONNode( "orderId", orderId ) );
-    n.push_back( JSONNode( "orderState", ostate ) );
+    n.push_back( jsonifyContract( "contract", contract ) );
+    n.push_back( jsonifyOrder( order ) );
+    n.push_back( jsonifyOrderState( ostate ) );
     this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::openOrderEnd() {
@@ -414,7 +417,7 @@ void IbPosixClient::updatePortfolio( const Contract& contract, int position,
                                      const IBString& accountName ) {
     JSONNode n( JSON_NODE );
     n.push_back( JSONNode( "messageId", "updatePortfolio" ) );
-    n.push_back( JSONNode( "contract", contract ) );
+    n.push_back( jsonifyContract( "contract", contract ) );
     n.push_back( JSONNode( "position", position ) );
     n.push_back( JSONNode( "marketPrice", marketPrice ) );
     n.push_back( JSONNode( "marketValue", marketValue ) );
@@ -447,7 +450,7 @@ void IbPosixClient::contractDetails( int reqId,
     JSONNode n( JSON_NODE );
     n.push_back( JSONNode( "messageId", "contractDetails" ) );
     n.push_back( JSONNode( "reqId", reqId ) );
-    n.push_back( JSONNode( "contractDetails", contractDetails ) );
+    n.push_back( jsonifyContractDetails( contractDetails ) );
     this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::bondContractDetails( int reqId, 
@@ -455,7 +458,7 @@ void IbPosixClient::bondContractDetails( int reqId,
     JSONNode n( JSON_NODE );
     n.push_back( JSONNode( "messageId", "bondContractDetails" ) );
     n.push_back( JSONNode( "reqId", reqId ) );
-    n.push_back( JSONNode( "contractDetails", contractDetails ) );
+    n.push_back( jsonifyContractDetails( contractDetails ) );
     this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::contractDetailsEnd( int reqId ) {
@@ -469,8 +472,8 @@ void IbPosixClient::execDetails( int reqId, const Contract& contract,
     JSONNode n( JSON_NODE );
     n.push_back( JSONNode( "messageId", "execDetails" ) );
     n.push_back( JSONNode( "reqId", reqId ) );
-    n.push_back( JSONNode( "contract", contract ) );
-    n.push_back( JSONNode( "execution", execution ) );
+    n.push_back( jsonifyContract( "contract", contract ) );
+    n.push_back( jsonifyExecution( execution ) );
     this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::execDetailsEnd( int reqId ) {
@@ -574,7 +577,7 @@ void IbPosixClient::scannerData( int reqId, int rank,
     n.push_back( JSONNode( "messageId", "scannerData" ) );
     n.push_back( JSONNode( "reqId", reqId ) );
     n.push_back( JSONNode( "rank", rank ) );
-    n.push_back( JSONNode( "contractDetails", contractDetails ) );
+    n.push_back( jsonifyContractDetails( contractDetails ) );
     n.push_back( JSONNode( "distance", distance ) );
     n.push_back( JSONNode( "benchmark", benchmark ) );
     n.push_back( JSONNode( "projection", projection ) );
@@ -621,7 +624,7 @@ void IbPosixClient::deltaNeutralValidation( int reqId,
     JSONNode n( JSON_NODE );
     n.push_back( JSONNode( "messageId", "deltaNeutralValidation" ) );
     n.push_back( JSONNode( "reqId", reqId ) );
-    n.push_back( JSONNode( "underComp", underComp ) );
+    n.push_back( jsonifyUnderComp( underComp ) );
     this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::tickSnapshotEnd( int reqId ) {
@@ -641,7 +644,7 @@ void IbPosixClient::commissionReport(
         const CommissionReport& commissionReport ) {
     JSONNode n( JSON_NODE );
     n.push_back( JSONNode( "messageId", "commissionReport" ) );
-    n.push_back( JSONNode( "commissionReport", commissionReport ) );
+    n.push_back( jsonifyCommissionReport( commissionReport ) );
     this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::position( const IBString& account, 
@@ -650,7 +653,7 @@ void IbPosixClient::position( const IBString& account,
     JSONNode n( JSON_NODE );
     n.push_back( JSONNode( "messageId", "position" ) );
     n.push_back( JSONNode( "account", account ) );
-    n.push_back( JSONNode( "contract", contract ) );
+    n.push_back( jsonifyContract( "contract", contract ) );
     n.push_back( JSONNode( "position", position ) );
     n.push_back( JSONNode( "avgCost", avgCost ) );
     this->m_inboundMsgs.push( n );
@@ -1175,4 +1178,231 @@ CurrentTimeData IbPosixClient::getCurrentTime(){
         }
     popped.isValid = false;
     return popped;
+}
+JSONNode IbPosixClient::jsonifyContract(std::string name, const Contract& contract) {
+    JSONNode c( JSON_NODE );
+    c.set_name( name );
+    c.push_back( JSONNode( "conId", contract.conId ) );
+    c.push_back( JSONNode( "symbol", contract.symbol ) );
+    c.push_back( JSONNode( "secType", contract.secType ) );
+    c.push_back( JSONNode( "expiry", contract.expiry ) );
+    c.push_back( JSONNode( "strike", contract.strike ) );
+    c.push_back( JSONNode( "right", contract.right ) );
+    c.push_back( JSONNode( "multiplier", contract.multiplier ) );
+    c.push_back( JSONNode( "exchange", contract.exchange ) );
+    c.push_back( JSONNode( "primaryExchange", contract.primaryExchange ) );
+    c.push_back( JSONNode( "currency", contract.currency ) );
+    c.push_back( JSONNode( "localSymbol", contract.localSymbol ) );
+    c.push_back( JSONNode( "tradingClass", contract.tradingClass ) );
+    c.push_back( JSONNode( "includeExpired", contract.includeExpired ) );
+    c.push_back( JSONNode( "secIdType", contract.secIdType ) );
+    c.push_back( JSONNode( "secId", contract.secId ) );
+    return c;
+}
+JSONNode IbPosixClient::jsonifyUnderComp(const UnderComp& underComp) {
+    JSONNode u( JSON_NODE );
+    u.push_back( JSONNode( "conId", underComp.conId ) );
+    u.push_back( JSONNode( "delta", underComp.delta ) );
+    u.push_back( JSONNode( "price", underComp.price ) );
+    return u;
+}
+JSONNode IbPosixClient::jsonifyContractDetails(const ContractDetails& cd) {
+    JSONNode c( JSON_NODE );
+
+    c.push_back( jsonifyContract( "summary", cd.summary ) );
+    c.push_back( JSONNode( "marketName", cd.marketName ) );
+    c.push_back( JSONNode( "minTick", cd.minTick ) );
+    c.push_back( JSONNode( "orderTypes", cd.orderTypes ) );
+    c.push_back( JSONNode( "validExchanges", cd.validExchanges ) );
+    c.push_back( JSONNode( "priceMagnifier", cd.priceMagnifier ) );
+    c.push_back( JSONNode( "underConId", cd.underConId ) );
+    c.push_back( JSONNode( "longName", cd.longName ) );
+    c.push_back( JSONNode( "contractMonth", cd.contractMonth ) );
+    c.push_back( JSONNode( "industry", cd.industry ) );
+    c.push_back( JSONNode( "category", cd.category ) );
+    c.push_back( JSONNode( "subcategory", cd.subcategory ) );
+    c.push_back( JSONNode( "timeZoneId", cd.timeZoneId ) );
+    c.push_back( JSONNode( "tradingHours", cd.tradingHours ) );
+    c.push_back( JSONNode( "liquidHours", cd.liquidHours ) );
+    c.push_back( JSONNode( "evRule", cd.evRule ) );
+    c.push_back( JSONNode( "evMultiplier", cd.evMultiplier ) );
+
+    // BOND values
+    c.push_back( JSONNode( "cusip", cd.cusip ) );
+    c.push_back( JSONNode( "ratings", cd.ratings ) );
+    c.push_back( JSONNode( "descAppend", cd.descAppend ) );
+    c.push_back( JSONNode( "bondType", cd.bondType ) );
+    c.push_back( JSONNode( "couponType", cd.couponType ) );
+    c.push_back( JSONNode( "callable", cd.callable ) );
+    c.push_back( JSONNode( "putable", cd.putable ) );
+    c.push_back( JSONNode( "coupon", cd.coupon ) );
+    c.push_back( JSONNode( "convertible", cd.convertible ) );
+    c.push_back( JSONNode( "maturity", cd.maturity ) );
+    c.push_back( JSONNode( "issueDate", cd.issueDate ) );
+    c.push_back( JSONNode( "nextOptionDate", cd.nextOptionDate ) );
+    c.push_back( JSONNode( "nextOptionType", cd.nextOptionType ) );
+    c.push_back( JSONNode( "nextOptionPartial", cd.nextOptionPartial ) );
+    c.push_back( JSONNode( "notes", cd.notes ) );
+
+    return c;
+}
+JSONNode IbPosixClient::jsonifyOrder(const Order& order) {
+    JSONNode o( JSON_NODE );
+    o.set_name( "order" );
+
+    // order identifier
+    o.push_back( JSONNode( "orderId", order.orderId ) );
+    o.push_back( JSONNode( "clientId", order.clientId ) );
+    o.push_back( JSONNode( "permId", order.permId ) );
+
+    // main order fields
+    o.push_back( JSONNode( "action", order.action ) );
+    o.push_back( JSONNode( "totalQuantity", order.totalQuantity ) );
+    o.push_back( JSONNode( "orderType", order.orderType ) );
+    o.push_back( JSONNode( "lmtPrice", order.lmtPrice ) );
+    o.push_back( JSONNode( "auxPrice", order.auxPrice ) );
+
+    // extended order fields
+    o.push_back( JSONNode( "tif", order.tif ) );           // "Time in Force" - DAY, GTC, etc.
+    o.push_back( JSONNode( "activeStartTime", order.activeStartTime ) );   // for GTC orders
+    o.push_back( JSONNode( "activeStopTime", order.activeStopTime ) );    // for GTC orders
+    o.push_back( JSONNode( "ocaGroup", order.ocaGroup ) );      // one cancels all group name
+    o.push_back( JSONNode( "ocaType", order.ocaType ) );       // 1 = CANCEL_WITH_BLOCK, 2 = REDUCE_WITH_BLOCK, 3 = REDUCE_NON_BLOCK
+    o.push_back( JSONNode( "orderRef", order.orderRef ) );      // order reference
+    o.push_back( JSONNode( "transmit", order.transmit ) );      // if false, order will be created but not transmited
+    o.push_back( JSONNode( "parentId", order.parentId ) );      // Parent order Id, to associate Auto STP or TRAIL orders with the original order.
+    o.push_back( JSONNode( "blockOrder", order.blockOrder ) );
+    o.push_back( JSONNode( "sweepToFill", order.sweepToFill ) );
+    o.push_back( JSONNode( "displaySize", order.displaySize ) );
+    o.push_back( JSONNode( "triggerMethod", order.triggerMethod ) ); // 0=Default, 1=Double_Bid_Ask, 2=Last, 3=Double_Last, 4=Bid_Ask, 7=Last_or_Bid_Ask, 8=Mid-point
+    o.push_back( JSONNode( "outsideRth", order.outsideRth ) );
+    o.push_back( JSONNode( "hidden", order.hidden ) );
+    o.push_back( JSONNode( "goodAfterTime", order.goodAfterTime ) );    // Format: 20060505 08:00:00 {time zone}
+    o.push_back( JSONNode( "goodTillDate", order.goodTillDate ) );     // Format: 20060505 08:00:00 {time zone}
+    o.push_back( JSONNode( "rule80A", order.rule80A ) ); // Individual = 'I', Agency = 'A', AgentOtherMember = 'W', IndividualPTIA = 'J', AgencyPTIA = 'U', AgentOtherMemberPTIA = 'M', IndividualPT = 'K', AgencyPT = 'Y', AgentOtherMemberPT = 'N'
+    o.push_back( JSONNode( "allOrNone", order.allOrNone ) );
+    o.push_back( JSONNode( "minQty", order.minQty ) );
+    o.push_back( JSONNode( "percentOffset", order.percentOffset ) ); // REL orders only
+    o.push_back( JSONNode( "overridePercentageConstraints", order.overridePercentageConstraints ) );
+    o.push_back( JSONNode( "trailStopPrice", order.trailStopPrice ) ); // TRAILLIMIT orders only
+    o.push_back( JSONNode( "trailingPercent", order.trailingPercent ) );
+
+    // financial advisors only
+    o.push_back( JSONNode( "faGroup", order.faGroup ) );
+    o.push_back( JSONNode( "faProfile", order.faProfile ) );
+    o.push_back( JSONNode( "faMethod", order.faMethod ) );
+    o.push_back( JSONNode( "faPercentage", order.faPercentage ) );
+
+    // institutional (ie non-cleared) only
+    o.push_back( JSONNode( "openClose", order.openClose ) ); // O=Open, C=Close
+    o.push_back( JSONNode( "origin", order.origin ) );    // 0=Customer, 1=Firm
+    o.push_back( JSONNode( "shortSaleSlot", order.shortSaleSlot ) ); // 1 if you hold the shares, 2 if they will be delivered from elsewhere.  Only for Action="SSHORT
+    o.push_back( JSONNode( "designatedLocation", order.designatedLocation ) ); // set when slot=2 only.
+    o.push_back( JSONNode( "exemptCode", order.exemptCode ) );
+
+    // SMART routing only
+    o.push_back( JSONNode( "discretionaryAmt", order.discretionaryAmt ) );
+    o.push_back( JSONNode( "eTradeOnly", order.eTradeOnly ) );
+    o.push_back( JSONNode( "firmQuoteOnly", order.firmQuoteOnly ) );
+    o.push_back( JSONNode( "nbboPriceCap", order.nbboPriceCap ) );
+    o.push_back( JSONNode( "optOutSmartRouting", order.optOutSmartRouting ) );
+
+    // BOX exchange orders only
+    o.push_back( JSONNode( "auctionStrategy", order.auctionStrategy ) ); // AUCTION_MATCH, AUCTION_IMPROVEMENT, AUCTION_TRANSPARENT
+    o.push_back( JSONNode( "startingPrice", order.startingPrice ) );
+    o.push_back( JSONNode( "stockRefPrice", order.stockRefPrice ) );
+    o.push_back( JSONNode( "delta", order.delta ) );
+
+    // pegged to stock and VOL orders only
+    o.push_back( JSONNode( "stockRangeLower", order.stockRangeLower ) );
+    o.push_back( JSONNode( "stockRangeUpper", order.stockRangeUpper ) );
+
+    // VOLATILITY ORDERS ONLY
+    o.push_back( JSONNode( "volatility", order.volatility ) );
+    o.push_back( JSONNode( "volatilityType", order.volatilityType ) );     // 1=daily, 2=annual
+    o.push_back( JSONNode( "deltaNeutralOrderType", order.deltaNeutralOrderType ) );
+    o.push_back( JSONNode( "deltaNeutralAuxPrice", order.deltaNeutralAuxPrice ) );
+    o.push_back( JSONNode( "deltaNeutralConId", order.deltaNeutralConId ) );
+    o.push_back( JSONNode( "deltaNeutralSettlingFirm", order.deltaNeutralSettlingFirm ) );
+    o.push_back( JSONNode( "deltaNeutralClearingAccount", order.deltaNeutralClearingAccount ) );
+    o.push_back( JSONNode( "deltaNeutralClearingIntent", order.deltaNeutralClearingIntent ) );
+    o.push_back( JSONNode( "deltaNeutralOpenClose", order.deltaNeutralOpenClose ) );
+    o.push_back( JSONNode( "deltaNeutralShortSale", order.deltaNeutralShortSale ) );
+    o.push_back( JSONNode( "deltaNeutralShortSaleSlot", order.deltaNeutralShortSaleSlot ) );
+    o.push_back( JSONNode( "deltaNeutralDesignatedLocation", order.deltaNeutralDesignatedLocation ) );
+    o.push_back( JSONNode( "continuousUpdate", order.continuousUpdate ) );
+    o.push_back( JSONNode( "referencePriceType", order.referencePriceType ) ); // 1=Average, 2 = BidOrAsk
+
+    // COMBO ORDERS ONLY
+    o.push_back( JSONNode( "basisPoints", order.basisPoints ) );      // EFP orders only
+    o.push_back( JSONNode( "basisPointsType", order.basisPointsType ) );  // EFP orders only
+
+    // SCALE ORDERS ONLY
+    o.push_back( JSONNode( "scaleInitLevelSize", order.scaleInitLevelSize ) );
+    o.push_back( JSONNode( "scaleSubsLevelSize", order.scaleSubsLevelSize ) );
+    o.push_back( JSONNode( "scalePriceIncrement", order.scalePriceIncrement ) );
+    o.push_back( JSONNode( "scalePriceAdjustValue", order.scalePriceAdjustValue ) );
+    o.push_back( JSONNode( "scalePriceAdjustInterval", order.scalePriceAdjustInterval ) );
+    o.push_back( JSONNode( "scaleProfitOffset", order.scaleProfitOffset ) );
+    o.push_back( JSONNode( "scaleAutoReset", order.scaleAutoReset ) );
+    o.push_back( JSONNode( "scaleInitPosition", order.scaleInitPosition ) );
+    o.push_back( JSONNode( "scaleInitFillQty", order.scaleInitFillQty ) );
+    o.push_back( JSONNode( "scaleRandomPercent", order.scaleRandomPercent ) );
+    o.push_back( JSONNode( "scaleTable", order.scaleTable ) );
+
+    // HEDGE ORDERS
+    o.push_back( JSONNode( "hedgeType", order.hedgeType ) );  // 'D' - delta, 'B' - beta, 'F' - FX, 'P' - pair
+    o.push_back( JSONNode( "hedgeParam", order.hedgeParam ) ); // 'beta=X' value for beta hedge, 'ratio=Y' for pair hedge
+
+    // Clearing info
+    o.push_back( JSONNode( "account", order.account ) ); // IB account
+    o.push_back( JSONNode( "settlingFirm", order.settlingFirm ) );
+    o.push_back( JSONNode( "clearingAccount", order.clearingAccount ) ); // True beneficiary of the order
+    o.push_back( JSONNode( "clearingIntent", order.clearingIntent ) ); // "" (Default), "IB", "Away", "PTA" (PostTrade)
+ 
+    return o;
+}
+JSONNode IbPosixClient::jsonifyOrderState(const OrderState& ostate) {
+    JSONNode o( JSON_NODE );
+    o.set_name( "orderState" );
+    o.push_back( JSONNode( "status", ostate.status ) );
+    o.push_back( JSONNode( "initMargin", ostate.initMargin ) );
+    o.push_back( JSONNode( "maintMargin", ostate.maintMargin ) );
+    o.push_back( JSONNode( "equityWithLoan", ostate.equityWithLoan ) );
+    o.push_back( JSONNode( "commission", ostate.commission ) );
+    o.push_back( JSONNode( "minCommission", ostate.minCommission ) );
+    o.push_back( JSONNode( "maxCommission", ostate.maxCommission ) );
+    o.push_back( JSONNode( "commissionCurrency", ostate.commissionCurrency ) );
+    o.push_back( JSONNode( "warningText", ostate.warningText ) );
+    return o;
+}
+JSONNode IbPosixClient::jsonifyExecution(const Execution& execution) {
+    JSONNode e( JSON_NODE );
+    e.push_back( JSONNode( "execId", execution.execId ) );
+    e.push_back( JSONNode( "time", execution.time ) );
+    e.push_back( JSONNode( "acctNumber", execution.acctNumber ) );
+    e.push_back( JSONNode( "exchange", execution.exchange ) );
+    e.push_back( JSONNode( "side", execution.side ) );
+    e.push_back( JSONNode( "shares", execution.shares ) );
+    e.push_back( JSONNode( "price", execution.price ) );
+    e.push_back( JSONNode( "permId", execution.permId ) );
+    e.push_back( JSONNode( "clientId", execution.clientId ) );
+    e.push_back( JSONNode( "orderId", execution.orderId ) );
+    e.push_back( JSONNode( "liquidation", execution.liquidation ) );
+    e.push_back( JSONNode( "cumQty", execution.cumQty ) );
+    e.push_back( JSONNode( "avgPrice", execution.avgPrice ) );
+    e.push_back( JSONNode( "orderRef", execution.orderRef ) );
+    e.push_back( JSONNode( "evRule", execution.evRule ) );
+    e.push_back( JSONNode( "evMultiplier", execution.evMultiplier ) );
+    return e;
+}
+JSONNode IbPosixClient::jsonifyCommissionReport(const CommissionReport& cr) {
+    JSONNode c( JSON_NODE );
+    c.push_back( JSONNode( "execId", cr.execId ) );
+    c.push_back( JSONNode( "commission", cr.commission ) );
+    c.push_back( JSONNode( "currency", cr.currency ) );
+    c.push_back( JSONNode( "realizedPNL", cr.realizedPNL ) );
+    c.push_back( JSONNode( "yield", cr.yield ) );
+    c.push_back( JSONNode( "yieldRedemptionDate", cr.yieldRedemptionDate ) );
+    return c;
 }
