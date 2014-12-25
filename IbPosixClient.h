@@ -12,6 +12,7 @@
 class EPosixClientSocket;
 struct ExecutionFilter;
 struct ScannerSubscription;
+class JSONNode;
 
 class IbPosixClient : public EWrapper {
 public:
@@ -179,6 +180,7 @@ public:
     void displayGroupUpdated( int reqId, const IBString& contractInfo);
 
 // accessors
+    JSONNode getInboundMsg();
     TickPriceData getTickPrice(); 
     TickSizeData getTickSize(); 
     TickOptionComputationData getTickOptionComputation(); 
@@ -230,7 +232,7 @@ private:
     std::auto_ptr<EPosixClientSocket> m_pClient;
 
 ///// node.js accessible
-
+    std::queue< JSONNode > m_inboundMsgs;
     std::queue< TickPriceData > m_tickPrices;
     std::queue< TickSizeData > m_tickSizes;
     std::queue< TickOptionComputationData > m_tickOptionComps;

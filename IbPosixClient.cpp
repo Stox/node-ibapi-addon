@@ -7,6 +7,7 @@
 
 #include "import/EPosixClientSocket.h"
 #include "import/EPosixClientSocketPlatform.h"
+#include "import/libjson/libjson.h"
 
 #include "import/Contract.h"
 #include "import/Order.h"
@@ -270,21 +271,21 @@ void IbPosixClient::unsubscribeFromGroupEvents( int reqId ) {
 
 void IbPosixClient::tickPrice( TickerId tickerId, TickType field, double price,
                                int canAutoExecute ) {
-    TickPriceData newData;
-    newData.isValid = true;
-    newData.tickerId = tickerId;
-    newData.field = field;
-    newData.price = price;
-    newData.canAutoExecute = canAutoExecute;
-    this->m_tickPrices.push( newData );
+    JSONNode n(JSON_NODE);
+    n.push_back( JSONNode( "messageId", "tickPrice" ) );
+    n.push_back( JSONNode( "tickerId", tickerId ) );
+    n.push_back( JSONNode( "field", field ) );
+    n.push_back( JSONNode( "price", price ) );
+    n.push_back( JSONNode( "canAutoExecute", canAutoExecute ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::tickSize( TickerId tickerId, TickType field, int size ) {
-    TickSizeData newData;
-    newData.isValid = true;
-    newData.tickerId = tickerId;
-    newData.field = field;
-    newData.size = size;
-    this->m_tickSizes.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "tickSize" ) );
+    n.push_back( JSONNode( "tickerId", tickerId ) );
+    n.push_back( JSONNode( "field", field ) );
+    n.push_back( JSONNode( "size", size ) );
+    this->m_inboundMsgs.push( n );
 }
 // TODO NOT TESTED
 void IbPosixClient::tickOptionComputation( TickerId tickerId, 
@@ -293,39 +294,39 @@ void IbPosixClient::tickOptionComputation( TickerId tickerId,
                                            double optPrice, double pvDividend, 
                                            double gamma, double vega, 
                                            double theta, double undPrice ) {
-    TickOptionComputationData newData;
-    newData.isValid = true;
-    newData.tickerId = tickerId;
-    newData.tickType = tickType;
-    newData.impliedVol = impliedVol;
-    newData.delta = delta;
-    newData.optPrice = optPrice;
-    newData.pvDividend = pvDividend;
-    newData.gamma = gamma;
-    newData.vega = vega;
-    newData.theta = theta;
-    newData.undPrice = undPrice;
-    this->m_tickOptionComps.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "tickOptionComputation" ) );
+    n.push_back( JSONNode( "tickerId", tickerId ) );
+    n.push_back( JSONNode( "tickType", tickType ) );
+    n.push_back( JSONNode( "impliedVol", impliedVol ) );
+    n.push_back( JSONNode( "delta", delta ) );
+    n.push_back( JSONNode( "optPrice", optPrice ) );
+    n.push_back( JSONNode( "pvDividend", pvDividend ) );
+    n.push_back( JSONNode( "gamma", gamma ) );
+    n.push_back( JSONNode( "vega", vega ) );
+    n.push_back( JSONNode( "theta", theta ) );
+    n.push_back( JSONNode( "undPrice", undPrice ) );
+    this->m_inboundMsgs.push( n );
 }
 // TODO NOT TESTED
 void IbPosixClient::tickGeneric( TickerId tickerId, TickType tickType, 
                                  double value ) {
-    TickGenericData newData;
-    newData.isValid = true;
-    newData.tickerId = tickerId;
-    newData.tickType = tickType;
-    newData.value = value;
-    this->m_tickGenerics.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "tickGeneric" ) );
+    n.push_back( JSONNode( "tickerId", tickerId ) );
+    n.push_back( JSONNode( "tickType", tickType ) );
+    n.push_back( JSONNode( "value", value ) );
+    this->m_inboundMsgs.push( n );
 }
 // TODO NOT TESTED
 void IbPosixClient::tickString( TickerId tickerId, TickType tickType, 
                                 const IBString& value ) {
-    TickStringData newData;
-    newData.isValid = true;
-    newData.tickerId = tickerId;
-    newData.tickType = tickType;
-    newData.value = value;
-    this->m_tickStrings.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "tickString" ) );
+    n.push_back( JSONNode( "tickerId", tickerId ) );
+    n.push_back( JSONNode( "tickType", tickType ) );
+    n.push_back( JSONNode( "value", value ) );
+    this->m_inboundMsgs.push( n );
 }
 // TODO NOT TESTED
 void IbPosixClient::tickEFP( TickerId tickerId, TickType tickType, 
@@ -335,18 +336,18 @@ void IbPosixClient::tickEFP( TickerId tickerId, TickType tickType,
                              const IBString& futureExpiry, 
                              double dividendImpact, 
                              double dividendsToExpiry ) {
-    TickEFPData newData;
-    newData.isValid = true;
-    newData.tickerId = tickerId;
-    newData.tickType = tickType;
-    newData.basisPoints = basisPoints;
-    newData.formattedBasisPoints = formattedBasisPoints;
-    newData.totalDividends = totalDividends;
-    newData.holdDays = holdDays;
-    newData.futureExpiry = futureExpiry;
-    newData.dividendImpact = dividendImpact;
-    newData.dividendsToExpiry = dividendsToExpiry;
-    this->m_tickEFPs.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "tickEFP" ) );
+    n.push_back( JSONNode( "tickerId", tickerId ) );
+    n.push_back( JSONNode( "tickType", tickType ) );
+    n.push_back( JSONNode( "basisPoints", basisPoints ) );
+    n.push_back( JSONNode( "formattedBasisPoints", formattedBasisPoints ) );
+    n.push_back( JSONNode( "totalDividends", totalDividends ) );
+    n.push_back( JSONNode( "holdDays", holdDays ) );
+    n.push_back( JSONNode( "futureExpiry", futureExpiry ) );
+    n.push_back( JSONNode( "dividendImpact", dividendImpact ) );
+    n.push_back( JSONNode( "dividendsToExpiry", dividendsToExpiry ) );
+    this->m_inboundMsgs.push( n );
 }
 // TODO NOT TESTED
 void IbPosixClient::orderStatus( OrderId orderId, const IBString &status, 
@@ -354,214 +355,214 @@ void IbPosixClient::orderStatus( OrderId orderId, const IBString &status,
                                  double avgFillPrice, int permId, int parentId,
                                  double lastFillPrice, int clientId, 
                                  const IBString& whyHeld ) {
-    OrderStatusData newData;
-    newData.isValid = true;
-    newData.orderId = orderId;
-    newData.status = status;
-    newData.filled = filled;
-    newData.remaining = remaining;
-    newData.avgFillPrice = avgFillPrice;
-    newData.permId = permId;
-    newData.parentId = parentId;
-    newData.lastFillPrice = lastFillPrice;
-    newData.clientId = clientId;
-    newData.whyHeld = whyHeld;
-    this->m_orderStatuses.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "orderStatus" ) );
+    n.push_back( JSONNode( "orderId", orderId ) );
+    n.push_back( JSONNode( "status", status ) );
+    n.push_back( JSONNode( "filled", filled ) );
+    n.push_back( JSONNode( "remaining", remaining ) );
+    n.push_back( JSONNode( "avgFillPrice", avgFillPrice ) );
+    n.push_back( JSONNode( "permId", permId ) );
+    n.push_back( JSONNode( "parentId", parentId ) );
+    n.push_back( JSONNode( "lastFillPrice", lastFillPrice ) );
+    n.push_back( JSONNode( "clientId", clientId ) );
+    n.push_back( JSONNode( "whyHeld", whyHeld ) );
+    this->m_inboundMsgs.push( n );
 }
 // No idea how to handle contract and order
 void IbPosixClient::openOrder( OrderId orderId, const Contract&, const Order&, 
                                const OrderState& ostate ) {
-    OpenOrderData newData;
-    newData.isValid = true;
-    newData.orderId = orderId;
-    newData.orderState = ostate;
-    this->m_openOrders.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "openOrder" ) );
+    n.push_back( JSONNode( "orderId", orderId ) );
+    n.push_back( JSONNode( "orderState", ostate ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::openOrderEnd() {
-    OpenOrderEndData newData;
-    newData.isValid = true;
-    this->m_openOrderEnd.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "openOrderEnd" ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::winError( const IBString &str, int lastError ) {
-    WinErrorData newData;
-    newData.isValid = true;
-    newData.str = str;
-    newData.lastError = lastError;
-    this->m_winErrors.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "winError" ) );
+    n.push_back( JSONNode( "str", str ) );
+    n.push_back( JSONNode( "lastError", lastError ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::connectionClosed() {
-    ConnectionClosedData newData;
-    newData.isValid = true;
-    this->m_connectionClosed.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "connectionClosed" ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::updateAccountValue( const IBString& key, 
                                         const IBString& val,
                                         const IBString& currency, 
                                         const IBString& accountName ) {
-    UpdateAccountValueData newData;
-    newData.isValid = true;
-    newData.key = key;
-    newData.val = val;
-    newData.currency = currency;
-    newData.accountName = accountName;
-    this->m_updateAccountValues.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "updateAccountValue" ) );
+    n.push_back( JSONNode( "key", key ) );
+    n.push_back( JSONNode( "val", val ) );
+    n.push_back( JSONNode( "currency", currency ) );
+    n.push_back( JSONNode( "accountName", accountName ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::updatePortfolio( const Contract& contract, int position, 
                                      double marketPrice, double marketValue,
                                      double averageCost, double unrealizedPNL,
                                      double realizedPNL, 
                                      const IBString& accountName ) {
-    UpdatePortfolioData newData;
-    newData.isValid = true;
-    newData.contract = contract;
-    newData.position = position;
-    newData.marketPrice = marketPrice;
-    newData.marketValue = marketValue;
-    newData.averageCost = averageCost;
-    newData.unrealizedPNL = unrealizedPNL;
-    newData.realizedPNL = realizedPNL;
-    newData.accountName = accountName;
-    this->m_updatePortfolios.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "updatePortfolio" ) );
+    n.push_back( JSONNode( "contract", contract ) );
+    n.push_back( JSONNode( "position", position ) );
+    n.push_back( JSONNode( "marketPrice", marketPrice ) );
+    n.push_back( JSONNode( "marketValue", marketValue ) );
+    n.push_back( JSONNode( "averageCost", averageCost ) );
+    n.push_back( JSONNode( "unrealizedPNL", unrealizedPNL ) );
+    n.push_back( JSONNode( "realizedPNL", realizedPNL ) );
+    n.push_back( JSONNode( "accountName", accountName ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::updateAccountTime( const IBString& timeStamp ) {
-    UpdateAccountTimeData newData;
-    newData.isValid = true;
-    newData.timeStamp = timeStamp;
-    this->m_updateAccountTimes.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "updateAccountTime" ) );
+    n.push_back( JSONNode( "timeStamp", timeStamp ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::accountDownloadEnd( const IBString& accountName ) {
-    AccountDownloadEndData newData;
-    newData.isValid = true;
-    newData.accountName = accountName;
-    this->m_accountDownloadEnds.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "accountDownloadEnd" ) );
+    n.push_back( JSONNode( "accountName", accountName ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::nextValidId( OrderId orderId ) {
-    NextValidIdData newData;
-    newData.isValid = true;
-    newData.orderId = orderId;
-    this->m_validId.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "nextValidId" ) );
+    n.push_back( JSONNode( "orderId", orderId ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::contractDetails( int reqId, 
                                      const ContractDetails& contractDetails ) {
-    ContractDetailsData newData;
-    newData.isValid = true;
-    newData.reqId = reqId;
-    newData.contractDetails = contractDetails;
-    this->m_contractDetails.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "contractDetails" ) );
+    n.push_back( JSONNode( "reqId", reqId ) );
+    n.push_back( JSONNode( "contractDetails", contractDetails ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::bondContractDetails( int reqId, 
                                       const ContractDetails& contractDetails ) {
-    BondContractDetailsData newData;
-    newData.isValid = true;
-    newData.reqId = reqId;
-    newData.contractDetails = contractDetails;
-    this->m_bondContractDetails.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "bondContractDetails" ) );
+    n.push_back( JSONNode( "reqId", reqId ) );
+    n.push_back( JSONNode( "contractDetails", contractDetails ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::contractDetailsEnd( int reqId ) {
-    ContractDetailsEndData newData;
-    newData.isValid = true;
-    newData.reqId = reqId;
-    this->m_contractDetailsEnd.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "contractDetailsEnd" ) );
+    n.push_back( JSONNode( "reqId", reqId ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::execDetails( int reqId, const Contract& contract, 
                                  const Execution& execution ) {
-    ExecDetailsData newData;
-    newData.isValid = true;
-    newData.reqId = reqId;
-    newData.contract = contract;
-    newData.execution = execution;
-    this->m_execDetails.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "execDetails" ) );
+    n.push_back( JSONNode( "reqId", reqId ) );
+    n.push_back( JSONNode( "contract", contract ) );
+    n.push_back( JSONNode( "execution", execution ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::execDetailsEnd( int reqId ) {
-    ExecDetailsEndData newData;
-    newData.isValid = true;
-    newData.reqId = reqId;
-    this->m_execDetailsEnd.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "execDetailsEnd" ) );
+    n.push_back( JSONNode( "reqId", reqId ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::error( const int id, const int errorCode, 
                            const IBString errorString ) {
-    ErrorData newData;
-    newData.isValid = true;
-    newData.id = id;
-    newData.errorCode = errorCode;
-    newData.errorString = errorString;
-    this->m_errors.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "error" ) );
+    n.push_back( JSONNode( "id", id ) );
+    n.push_back( JSONNode( "errorCode", errorCode ) );
+    n.push_back( JSONNode( "errorString", errorString ) );
+    this->m_inboundMsgs.push( n );
     if ( id == -1 && errorCode == 1100 )
         disconnect();
 }
 void IbPosixClient::updateMktDepth( TickerId id, int position, int operation, 
                                     int side, double price, int size ) {
-    UpdateMktDepthData newData;
-    newData.isValid = true;
-    newData.id = id;
-    newData.position = position;
-    newData.operation = operation;
-    newData.side = side;
-    newData.price = price;
-    newData.size = size;
-    this->m_updateMktDepths.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "updateMktDepth" ) );
+    n.push_back( JSONNode( "id", id ) );
+    n.push_back( JSONNode( "position", position ) );
+    n.push_back( JSONNode( "operation", operation ) );
+    n.push_back( JSONNode( "side", side ) );
+    n.push_back( JSONNode( "price", price ) );
+    n.push_back( JSONNode( "size", size ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::updateMktDepthL2( TickerId id, int position, 
                                       IBString marketMaker, int operation, 
                                       int side, double price, int size ) {
-    UpdateMktDepthL2Data newData;
-    newData.isValid = true;
-    newData.id = id;
-    newData.position = position;
-    newData.marketMaker = marketMaker;
-    newData.operation = operation;
-    newData.side = side;
-    newData.price = price;
-    newData.size = size;
-    this->m_updateMktDepthL2s.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "updateMktDepthL2" ) );
+    n.push_back( JSONNode( "id", id ) );
+    n.push_back( JSONNode( "position", position ) );
+    n.push_back( JSONNode( "marketMaker", marketMaker ) );
+    n.push_back( JSONNode( "operation", operation ) );
+    n.push_back( JSONNode( "side", side ) );
+    n.push_back( JSONNode( "price", price ) );
+    n.push_back( JSONNode( "size", size ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::updateNewsBulletin( int msgId, int msgType, 
                                         const IBString& newsMessage, 
                                         const IBString& originExch ) {
-    UpdateNewsBulletinData newData;
-    newData.isValid = true;
-    newData.msgId = msgId;
-    newData.msgType = msgType;
-    newData.newsMessage = newsMessage;
-    newData.originExch = originExch;
-    this->m_updateNewsBulletins.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "updateNewsBulletin" ) );
+    n.push_back( JSONNode( "msgId", msgId ) );
+    n.push_back( JSONNode( "msgType", msgType ) );
+    n.push_back( JSONNode( "newsMessage", newsMessage ) );
+    n.push_back( JSONNode( "originExch", originExch ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::managedAccounts( const IBString& accountsList ) {
-    ManagedAccountsData newData;
-    newData.isValid = true;
-    newData.accountsList = accountsList;
-    this->m_managedAccounts.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "managedAccounts" ) );
+    n.push_back( JSONNode( "accountsList", accountsList ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::receiveFA( faDataType pFaDataType, const IBString& cxml ) {
-    ReceiveFAData newData;
-    newData.isValid = true;
-    newData.pFaDataType = pFaDataType;
-    newData.cxml = cxml;
-    this->m_receiveFAs.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "receiveFA" ) );
+    n.push_back( JSONNode( "pFaDataType", pFaDataType ) );
+    n.push_back( JSONNode( "cxml", cxml ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::historicalData( TickerId reqId, const IBString& date, 
                                     double open, double high, double low, 
                                     double close, int volume, int barCount, 
                                     double WAP, int hasGaps ) {
-    HistoricalDataData newData;
-    newData.isValid = true;
-    newData.reqId = reqId;
-    newData.date = date;
-    newData.open = open;
-    newData.high = high;
-    newData.low = low;
-    newData.close = close;
-    newData.volume = volume;
-    newData.barCount = barCount;
-    newData.WAP = WAP;
-    newData.hasGaps = hasGaps;
-    this->m_historicalData.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "historicalData" ) );
+    n.push_back( JSONNode( "reqId", reqId ) );
+    n.push_back( JSONNode( "date", date ) );
+    n.push_back( JSONNode( "open", open ) );
+    n.push_back( JSONNode( "high", high ) );
+    n.push_back( JSONNode( "low", low ) );
+    n.push_back( JSONNode( "close", close ) );
+    n.push_back( JSONNode( "volume", volume ) );
+    n.push_back( JSONNode( "barCount", barCount ) );
+    n.push_back( JSONNode( "WAP", WAP ) );
+    n.push_back( JSONNode( "hasGaps", hasGaps ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::scannerParameters( const IBString &xml ) {
-    ScannerParametersData newData;
-    newData.isValid = true;
-    newData.xml = xml;
-    this->m_scannerParameters.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "scannerParameters" ) );
+    n.push_back( JSONNode( "xml", xml ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::scannerData( int reqId, int rank, 
                                  const ContractDetails &contractDetails, 
@@ -569,140 +570,150 @@ void IbPosixClient::scannerData( int reqId, int rank,
                                  const IBString &benchmark, 
                                  const IBString &projection, 
                                  const IBString &legsStr ) {
-    ScannerDataData newData;
-    newData.isValid = true;
-    newData.reqId = reqId;
-    newData.rank = rank;
-    newData.contractDetails = contractDetails;
-    newData.distance = distance;
-    newData.benchmark = benchmark;
-    newData.projection = projection;
-    newData.legsStr = legsStr;
-    this->m_scannerData.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "scannerData" ) );
+    n.push_back( JSONNode( "reqId", reqId ) );
+    n.push_back( JSONNode( "rank", rank ) );
+    n.push_back( JSONNode( "contractDetails", contractDetails ) );
+    n.push_back( JSONNode( "distance", distance ) );
+    n.push_back( JSONNode( "benchmark", benchmark ) );
+    n.push_back( JSONNode( "projection", projection ) );
+    n.push_back( JSONNode( "legsStr", legsStr ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::scannerDataEnd( int reqId ) {
-    ScannerDataEndData newData;
-    newData.isValid = true;
-    newData.reqId = reqId;
-    this->m_scannerDataEnd.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "scannerDataEnd" ) );
+    n.push_back( JSONNode( "reqId", reqId ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::realtimeBar( TickerId reqId, long itime, double open, 
                                  double high, double low, double close, 
                                  long volume, double wap, int count ) {
-    RealtimeBarData newData;
-    newData.isValid = true;
-    newData.reqId = reqId;
-    newData.time = itime;
-    newData.open = open;
-    newData.high = high;
-    newData.low = low;
-    newData.close = close;
-    newData.volume = volume;
-    newData.wap = wap;
-    newData.count = count;
-    this->m_realtimeBars.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "realtimeBar" ) );
+    n.push_back( JSONNode( "reqId", reqId ) );
+    n.push_back( JSONNode( "time", itime ) );
+    n.push_back( JSONNode( "open", open ) );
+    n.push_back( JSONNode( "high", high ) );
+    n.push_back( JSONNode( "low", low ) );
+    n.push_back( JSONNode( "close", close ) );
+    n.push_back( JSONNode( "volume", volume ) );
+    n.push_back( JSONNode( "wap", wap ) );
+    n.push_back( JSONNode( "count", count ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::currentTime( long time ) {
-    CurrentTimeData newData;
-    newData.isValid = true;
-    newData.time = time;
-    this->m_currentTime.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "currentTime" ) );
+    n.push_back( JSONNode( "time", time ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::fundamentalData( TickerId reqId, const IBString& data ) {
-    FundamentalDataData newData;
-    newData.isValid = true;
-    newData.reqId = reqId;
-    newData.data = data;
-    this->m_fundamentalData.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "fundamentalData" ) );
+    n.push_back( JSONNode( "reqId", reqId ) );
+    n.push_back( JSONNode( "data", data ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::deltaNeutralValidation( int reqId, 
                                             const UnderComp& underComp ) {
-    DeltaNeutralValidationData newData;
-    newData.isValid = true;
-    newData.reqId = reqId;
-    newData.underComp = underComp;
-    this->m_deltaNeutralValidations.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "deltaNeutralValidation" ) );
+    n.push_back( JSONNode( "reqId", reqId ) );
+    n.push_back( JSONNode( "underComp", underComp ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::tickSnapshotEnd( int reqId ) {
-    TickSnapshotEndData newData;
-    newData.isValid = true;
-    newData.reqId = reqId;
-    this->m_tickSnapshotEnds.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "tickSnapshotEnd" ) );
+    n.push_back( JSONNode( "reqId", reqId ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::marketDataType( TickerId reqId, int marketDataType ) {
-    MarketDataTypeData newData;
-    newData.isValid = true;
-    newData.reqId = reqId;
-    newData.marketDataType = marketDataType;
-    this->m_marketDataTypes.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "marketDataType" ) );
+    n.push_back( JSONNode( "reqId", reqId ) );
+    n.push_back( JSONNode( "marketDataType", marketDataType ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::commissionReport( 
         const CommissionReport& commissionReport ) {
-    CommissionReportData newData;
-    newData.isValid = true;
-    newData.commissionReport = commissionReport;
-    this->m_commissionReports.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "commissionReport" ) );
+    n.push_back( JSONNode( "commissionReport", commissionReport ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::position( const IBString& account, 
                               const Contract& contract, int position,
                               double avgCost ) {
-    PositionData newData;
-    newData.isValid = true;
-    newData.account = account;
-    newData.contract = contract;
-    newData.position = position;
-    newData.avgCost = avgCost;
-    this->m_positions.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "position" ) );
+    n.push_back( JSONNode( "account", account ) );
+    n.push_back( JSONNode( "contract", contract ) );
+    n.push_back( JSONNode( "position", position ) );
+    n.push_back( JSONNode( "avgCost", avgCost ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::positionEnd() {
-    PositionEndData newData;
-    newData.isValid = true;
-    this->m_positionEnd.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "positionEnd" ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::accountSummary( int reqId, const IBString& account, 
                                     const IBString& tag, const IBString& value,
                                     const IBString& curency ) {
-    AccountSummaryData newData;
-    newData.isValid = true;
-    newData.reqId = reqId;
-    newData.account = account;
-    newData.tag = tag;
-    newData.value = value;
-    newData.curency = curency;
-    this->m_accountSummaries.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "accountSummary" ) );
+    n.push_back( JSONNode( "reqId", reqId ) );
+    n.push_back( JSONNode( "account", account ) );
+    n.push_back( JSONNode( "tag", tag ) );
+    n.push_back( JSONNode( "value", value ) );
+    n.push_back( JSONNode( "curency", curency ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::accountSummaryEnd( int reqId ) {
-    AccountSummaryEndData newData;
-    newData.isValid = true;
-    newData.reqId = reqId;
-    this->m_accountSummaryEnd.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "accountSummaryEnd" ) );
+    n.push_back( JSONNode( "reqId", reqId ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::verifyMessageAPI( const IBString& apiData ) {
-    VerifyMessageAPIData newData;
-    newData.isValid = true;
-    newData.apiData = apiData;
-    this->m_verifyMessageAPIs.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "verifyMessageAPI" ) );
+    n.push_back( JSONNode( "apiData", apiData ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::verifyCompleted( bool isSuccessful, const IBString& errorText) {
-    VerifyCompletedData newData;
-    newData.isValid = true;
-    newData.isSuccessful = isSuccessful;
-    newData.errorText = errorText;
-    this->m_verifyCompleted.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "verifyCompleted" ) );
+    n.push_back( JSONNode( "isSuccessful", isSuccessful ) );
+    n.push_back( JSONNode( "errorText", errorText ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::displayGroupList( int reqId, const IBString& groups) {
-    DisplayGroupListData newData;
-    newData.isValid = true;
-    newData.reqId = reqId;
-    newData.groups = groups;
-    this->m_displayGroupLists.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "displayGroupList" ) );
+    n.push_back( JSONNode( "reqId", reqId ) );
+    n.push_back( JSONNode( "groups", groups ) );
+    this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::displayGroupUpdated( int reqId, const IBString& contractInfo) {
-    DisplayGroupUpdatedData newData;
-    newData.isValid = true;
-    newData.reqId = reqId;
-    newData.contractInfo = contractInfo;
-    this->m_displayGroupUpdated.push( newData );
+    JSONNode n( JSON_NODE );
+    n.push_back( JSONNode( "messageId", "displayGroupUpdated" ) );
+    n.push_back( JSONNode( "reqId", reqId ) );
+    n.push_back( JSONNode( "contractInfo", contractInfo ) );
+    this->m_inboundMsgs.push( n );
+}
+
+JSONNode IbPosixClient::getInboundMsg() {
+    JSONNode popped;
+    if ( !this->m_inboundMsgs.empty() ) {
+        popped = this->m_inboundMsgs.front();
+        this->m_inboundMsgs.pop();
+        return popped;
+    }
+    return popped;
 }
 
 TickPriceData IbPosixClient::getTickPrice() {
