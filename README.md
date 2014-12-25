@@ -79,6 +79,7 @@ environment variables for Windows.
  * Add #define IB_USE_STD_STRING into the following files in /import directory:
     EClientSocketBase.cpp
     EPosixClientSocket.cpp
+ * Downloads libjson and builds the static library
 3. ```node-gyp rebuild```
 4. If build fails because you have VS2012, use ```node-gyp --msvs_version=2012 rebuild```
 

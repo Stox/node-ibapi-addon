@@ -1,10 +1,11 @@
 DIR="./import"
-PDIR="../"
+LIBJSON="./libjson"
 
 if [ ! -d "$DIR" ]
 then
     mkdir $DIR
 fi
+
 cd $DIR
 wget http://interactivebrokers.github.io/downloads/twsapi_macunix.971.01.jar
 unzip twsapi_macunix.971.01.jar
@@ -28,4 +29,15 @@ sed -i 's_// LINUX_#include <unistd.h>_g' ./EPosixClientSocketPlatform.h
 sed -i 's_"StdAfx.h"_"afx.h"_g' ./EClientSocketBaseImpl.h
 sed -i 's/snprintf/_snprintf/g' ./EClientSocketBaseImpl.h
 fi
-cd $PDIR
+
+wget -U "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:34.0) Gecko/20100101 Firefox/34.0" http://softlayer-dal.dl.sourceforge.net/project/libjson/libjson_7.6.1.zip
+unzip libjson_7.6.1.zip
+cd $LIBJSON
+if [ "$(uname)" = "Darwin" ]; then
+make
+elif [ "$(expr substr $(uname -s) 1 5)" = "Linux" ]; then
+make
+elif [ "$(expr substr $(uname -s) 1 10)" = "MINGW32_NT" ]; then
+make
+fi
+
