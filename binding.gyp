@@ -5,6 +5,7 @@
       "sources": [ "NodeIbapiAddon.cpp"
                   ,"NodeIbapi.cpp"
                   ,"IbPosixClient.cpp"
+                  ,"IbJsonParser.cpp"
                   ,"import/EPosixClientSocket.cpp"
                   ,"import/EClientSocketBase.cpp" ],
       "cflags":  ['-O2'],

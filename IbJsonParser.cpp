@@ -25,23 +25,23 @@ Handle<Object> IbJsonParser::parse( const JSONNode& n ) {
 			 node_name == "commissionReport" || node_name == "contract" ||
 			 node_name == "order" || node_name == "execution" ||
 			 node_name == "summary" || node_name == "contractDetails" ) {
-			retData->Set( String::NewSymbol( "orderState" ), parse( *i ) );
+			retData->Set( String::NewSymbol( node_name.c_str() ), parse( *i ) );
 		}
 		else if ( filterAsString( node_name ) ) {
-			retData->Set( String::NewSymbol( node_name ),
+			retData->Set( String::NewSymbol( node_name.c_str() ),
 				          String::New( i->as_string().c_str() ) );
 		}
 		else if ( filterAsNumber( node_name ) ) {
-			retData->Set( String::NewSymbol( node_name ),
+			retData->Set( String::NewSymbol( node_name.c_str() ),
 						  Number::New( i->as_float() ) );
 		}
 		else if ( filterAsInteger( node_name ) ) {
-			retData->Set( String::NewSymbol( node_name ),
+			retData->Set( String::NewSymbol( node_name.c_str() ),
 						  Integer::New( i->as_int() ) );
 		}
 		else if ( filterAsBoolean( node_name ) ) {
-			retData->Set( String::NewSymbol( node_name ),
-						  Boolean::New( i->as_int() ) );
+			retData->Set( String::NewSymbol( node_name.c_str() ),
+						  Boolean::New( i->as_bool() ) );
 		}
 		++i;
 	}
@@ -178,7 +178,7 @@ bool IbJsonParser::filterAsNumber( const std::string& node_name ) {
 		 node_name == "WAP" ||
 		 node_name == "wap" ||
 		 node_name == "yield" ||
-		 node_name == "avgCost" 
+		 node_name == "avgCost" ||
 		 node_name == "strike" ||
 		 node_name == "minTick" ||
 		 node_name == "evMultiplier" ||
@@ -259,7 +259,27 @@ bool IbJsonParser::filterAsInteger( const std::string& node_name ) {
 	return false;
 }
 bool IbJsonParser::filterAsBoolean( const std::string& node_name ) {
-	if ( node_name == "isSuccessful" )
+	if ( node_name == "isSuccessful" ||
+		 node_name == "includeExpired" ||
+		 node_name == "callable" ||
+		 node_name == "putable" ||
+		 node_name == "convertible" ||
+		 node_name == "nextOptionPartial" ||
+		 node_name == "transmit" ||
+		 node_name == "blockOrder" ||
+		 node_name == "sweepToFill" ||
+		 node_name == "outsideRth" ||
+		 node_name == "hidden" ||
+		 node_name == "allOrNone" ||
+		 node_name == "overridePercentageConstraints" ||
+		 node_name == "eTradeOnly" ||
+		 node_name == "firmQuoteOnly" ||
+		 node_name == "optOutSmartRouting" ||
+		 node_name == "deltaNeutralShortSale" ||
+		 node_name == "continuousUpdate" ||
+		 node_name == "scaleAutoReset" ||
+		 node_name == "scaleRandomPercent"
+		)
 		return true;
 	return false;
 }

@@ -1,6 +1,8 @@
 #ifndef ibjsonparser_h__INCLUDED
 #define ibjsonparser_h__INCLUDED
 
+#include <string>
+#include <cstring>
 #include <node.h>
 
 using namespace v8;
