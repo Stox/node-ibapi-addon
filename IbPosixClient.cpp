@@ -315,7 +315,7 @@ void IbPosixClient::tickGeneric( TickerId tickerId, TickType tickType,
     n.push_back( JSONNode( "messageId", "tickGeneric" ) );
     n.push_back( JSONNode( "tickerId", tickerId ) );
     n.push_back( JSONNode( "tickType", tickType ) );
-    n.push_back( JSONNode( "value", value ) );
+    n.push_back( JSONNode( "valueDouble", value ) );
     this->m_inboundMsgs.push( n );
 }
 // TODO NOT TESTED
@@ -325,7 +325,7 @@ void IbPosixClient::tickString( TickerId tickerId, TickType tickType,
     n.push_back( JSONNode( "messageId", "tickString" ) );
     n.push_back( JSONNode( "tickerId", tickerId ) );
     n.push_back( JSONNode( "tickType", tickType ) );
-    n.push_back( JSONNode( "value", value ) );
+    n.push_back( JSONNode( "valueString", value ) );
     this->m_inboundMsgs.push( n );
 }
 // TODO NOT TESTED
@@ -596,7 +596,7 @@ void IbPosixClient::realtimeBar( TickerId reqId, long itime, double open,
     JSONNode n( JSON_NODE );
     n.push_back( JSONNode( "messageId", "realtimeBar" ) );
     n.push_back( JSONNode( "reqId", reqId ) );
-    n.push_back( JSONNode( "time", itime ) );
+    n.push_back( JSONNode( "timeLong", itime ) );
     n.push_back( JSONNode( "open", open ) );
     n.push_back( JSONNode( "high", high ) );
     n.push_back( JSONNode( "low", low ) );
@@ -609,7 +609,7 @@ void IbPosixClient::realtimeBar( TickerId reqId, long itime, double open,
 void IbPosixClient::currentTime( long time ) {
     JSONNode n( JSON_NODE );
     n.push_back( JSONNode( "messageId", "currentTime" ) );
-    n.push_back( JSONNode( "time", time ) );
+    n.push_back( JSONNode( "timeLong", time ) );
     this->m_inboundMsgs.push( n );
 }
 void IbPosixClient::fundamentalData( TickerId reqId, const IBString& data ) {
@@ -671,7 +671,7 @@ void IbPosixClient::accountSummary( int reqId, const IBString& account,
     n.push_back( JSONNode( "reqId", reqId ) );
     n.push_back( JSONNode( "account", account ) );
     n.push_back( JSONNode( "tag", tag ) );
-    n.push_back( JSONNode( "value", value ) );
+    n.push_back( JSONNode( "valueString", value ) );
     n.push_back( JSONNode( "curency", curency ) );
     this->m_inboundMsgs.push( n );
 }
@@ -719,466 +719,7 @@ JSONNode IbPosixClient::getInboundMsg() {
     return popped;
 }
 
-TickPriceData IbPosixClient::getTickPrice() {
-    TickPriceData popped;
-    if ( !this->m_tickPrices.empty() ) {
-        popped = this->m_tickPrices.front();
-        this->m_tickPrices.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped; 
-}
-TickSizeData IbPosixClient::getTickSize() {
-    TickSizeData popped;
-    if ( !this->m_tickSizes.empty() ) {
-        popped = this->m_tickSizes.front();
-        this->m_tickSizes.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped; 
-}
-TickOptionComputationData IbPosixClient::getTickOptionComputation() {
-    TickOptionComputationData popped;
-    if ( !this->m_tickOptionComps.empty() ) {
-        popped = this->m_tickOptionComps.front();
-        this->m_tickOptionComps.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped; 
-}
-TickGenericData IbPosixClient::getTickGeneric() {
-    TickGenericData popped;
-    if ( !this->m_tickGenerics.empty() ) {
-        popped = this->m_tickGenerics.front();
-        this->m_tickGenerics.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;     
-}
-TickStringData IbPosixClient::getTickString() {
-    TickStringData popped;
-    if ( !this->m_tickStrings.empty() ) {
-        popped = this->m_tickStrings.front();
-        this->m_tickStrings.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped; 
-}
-TickEFPData IbPosixClient::getTickEFP() {
-    TickEFPData popped;
-    if ( !this->m_tickEFPs.empty() ) {
-        popped = this->m_tickEFPs.front();
-        this->m_tickEFPs.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped; 
-}
-OrderStatusData IbPosixClient::getOrderStatus() {
-    OrderStatusData popped;
-    if ( !this->m_orderStatuses.empty() ) {
-        popped = this->m_orderStatuses.front();
-        this->m_orderStatuses.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped; 
-}
-OpenOrderData IbPosixClient::getOpenOrder() {
-    OpenOrderData popped;
-    if ( !this->m_openOrders.empty() ) {
-        popped = this->m_openOrders.front();
-        this->m_openOrders.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped; 
-}
-OpenOrderEndData IbPosixClient::getOpenOrderEnd() {
-    OpenOrderEndData popped;
-    if ( !this->m_openOrderEnd.empty() ) {
-        popped = this->m_openOrderEnd.front();
-        this->m_openOrderEnd.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped; 
-}
-WinErrorData IbPosixClient::getWinError() {
-    WinErrorData popped;
-    if ( !this->m_winErrors.empty() ) {
-        popped = this->m_winErrors.front();
-        this->m_winErrors.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-ConnectionClosedData IbPosixClient::getConnectionClosed() {
-    ConnectionClosedData popped;
-    if ( !this->m_connectionClosed.empty() ) {
-        popped = this->m_connectionClosed.front();
-        this->m_connectionClosed.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped; 
-}
-UpdateAccountValueData IbPosixClient::getUpdateAccountValue() {
-    UpdateAccountValueData popped;
-    if ( !this->m_updateAccountValues.empty() ) {
-        popped = this->m_updateAccountValues.front();
-        this->m_updateAccountValues.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-UpdatePortfolioData IbPosixClient::getUpdatePortfolio() {
-    UpdatePortfolioData popped;
-    if ( !this->m_updatePortfolios.empty() ) {
-        popped = this->m_updatePortfolios.front();
-        this->m_updatePortfolios.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-UpdateAccountTimeData IbPosixClient::getUpdateAccountTime() {
-    UpdateAccountTimeData popped;
-    if ( !this->m_updateAccountTimes.empty() ) {
-        popped = this->m_updateAccountTimes.front();
-        this->m_updateAccountTimes.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-AccountDownloadEndData IbPosixClient::getAccountDownloadEnd() {
-    AccountDownloadEndData popped;
-    if ( !this->m_accountDownloadEnds.empty() ) {
-        popped = this->m_accountDownloadEnds.front();
-        this->m_accountDownloadEnds.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-NextValidIdData IbPosixClient::getNextValidId() {
-    NextValidIdData popped;
-    if ( !this->m_validId.empty() ) {
-        popped = this->m_validId.front();
-        this->m_validId.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-ContractDetailsData IbPosixClient::getContractDetails() {
-    ContractDetailsData popped;   
-    if ( !this->m_contractDetails.empty() ) {
-        popped = this->m_contractDetails.front();
-        this->m_contractDetails.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-BondContractDetailsData IbPosixClient::getBondContractDetails() {
-    BondContractDetailsData popped;
-    if ( !this->m_bondContractDetails.empty() ) {
-        popped = this->m_bondContractDetails.front();
-        this->m_bondContractDetails.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-ContractDetailsEndData IbPosixClient::getContractDetailsEnd() {
-    ContractDetailsEndData popped;
-    if ( !this->m_contractDetailsEnd.empty() ) {
-        popped = this->m_contractDetailsEnd.front();
-        this->m_contractDetailsEnd.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-ExecDetailsData IbPosixClient::getExecDetails() {
-    ExecDetailsData popped;
-    if ( !this->m_execDetails.empty() ) {
-        popped = this->m_execDetails.front();
-        this->m_execDetails.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-ExecDetailsEndData IbPosixClient::getExecDetailsEnd() {
-    ExecDetailsEndData popped;
-    if ( !this->m_execDetailsEnd.empty() ) {
-        popped = this->m_execDetailsEnd.front();
-        this->m_execDetailsEnd.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-ErrorData IbPosixClient::getError() {
-    ErrorData popped;
-    if ( !this->m_errors.empty() ) {
-        popped = this->m_errors.front();
-        this->m_errors.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-UpdateMktDepthData IbPosixClient::getUpdateMktDepth() {
-    UpdateMktDepthData popped;
-    if ( !this->m_updateMktDepths.empty() ) {
-        popped = this->m_updateMktDepths.front();
-        this->m_updateMktDepths.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-UpdateMktDepthL2Data IbPosixClient::getUpdateMktDepthL2() {
-    UpdateMktDepthL2Data popped;
-    if ( !this->m_updateMktDepthL2s.empty() ) {
-        popped = this->m_updateMktDepthL2s.front();
-        this->m_updateMktDepthL2s.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-UpdateNewsBulletinData IbPosixClient::getUpdateNewsBulletin() {
-    UpdateNewsBulletinData popped;
-    if ( !this->m_updateNewsBulletins.empty() ) {
-        popped = this->m_updateNewsBulletins.front();
-        this->m_updateNewsBulletins.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-ManagedAccountsData IbPosixClient::getManagedAccounts() {
-    ManagedAccountsData popped;
-    if ( !this->m_managedAccounts.empty() ) {
-        popped = this->m_managedAccounts.front();
-        this->m_managedAccounts.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-ReceiveFAData IbPosixClient::getReceiveFA() {
-    ReceiveFAData popped;
-    if ( !this->m_receiveFAs.empty() ) {
-        popped = this->m_receiveFAs.front();
-        this->m_receiveFAs.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-HistoricalDataData IbPosixClient::getHistoricalData() {
-    HistoricalDataData popped;
-    if ( !this->m_historicalData.empty() ) {
-        popped = this->m_historicalData.front();
-        this->m_historicalData.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-ScannerParametersData IbPosixClient::getScannerParameters() {
-    ScannerParametersData popped;
-    if ( !this->m_scannerParameters.empty() ) {
-        popped = this->m_scannerParameters.front();
-        this->m_scannerParameters.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-ScannerDataData IbPosixClient::getScannerData() {
-    ScannerDataData popped;
-    if ( !this->m_scannerData.empty() ) {
-        popped = this->m_scannerData.front();
-        this->m_scannerData.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-ScannerDataEndData IbPosixClient::getScannerDataEnd() {
-    ScannerDataEndData popped;
-    if ( !this->m_scannerDataEnd.empty() ) {
-        popped = this->m_scannerDataEnd.front();
-        this->m_scannerDataEnd.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-RealtimeBarData IbPosixClient::getRealtimeBar() {
-    RealtimeBarData popped;
-    if ( !this->m_realtimeBars.empty() ) {
-        popped = this->m_realtimeBars.front();
-        this->m_realtimeBars.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-FundamentalDataData IbPosixClient::getFundamentalData() {
-    FundamentalDataData popped;
-    if ( !this->m_fundamentalData.empty() ) {
-        popped = this->m_fundamentalData.front();
-        this->m_fundamentalData.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-DeltaNeutralValidationData IbPosixClient::getDeltaNeutralValidation() {
-    DeltaNeutralValidationData popped;
-    if ( !this->m_deltaNeutralValidations.empty() ) {
-        popped = this->m_deltaNeutralValidations.front();
-        this->m_deltaNeutralValidations.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-TickSnapshotEndData IbPosixClient::getTickSnapshotEnd() {
-    TickSnapshotEndData popped;
-    if ( !this->m_tickSnapshotEnds.empty() ) {
-        popped = this->m_tickSnapshotEnds.front();
-        this->m_tickSnapshotEnds.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-MarketDataTypeData IbPosixClient::getMarketDataType() {
-    MarketDataTypeData popped;
-    if ( !this->m_marketDataTypes.empty() ) {
-        popped = this->m_marketDataTypes.front();
-        this->m_marketDataTypes.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-CommissionReportData IbPosixClient::getCommissionReport() {
-    CommissionReportData popped;
-    if ( !this->m_commissionReports.empty() ) {
-        popped = this->m_commissionReports.front();
-        this->m_commissionReports.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-PositionData IbPosixClient::getPosition() {
-    PositionData popped;
-    if ( !this->m_positions.empty() ) {
-        popped = this->m_positions.front();
-        this->m_positions.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-PositionEndData IbPosixClient::getPositionEnd() {
-    PositionEndData popped;
-    if ( !this->m_positionEnd.empty() ) {
-        popped = this->m_positionEnd.front();
-        this->m_positionEnd.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-AccountSummaryData IbPosixClient::getAccountSummary() {
-    AccountSummaryData popped;
-    if ( !this->m_accountSummaries.empty() ) {
-        popped = this->m_accountSummaries.front();
-        this->m_accountSummaries.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-AccountSummaryEndData IbPosixClient::getAccountSummaryEnd() {
-    AccountSummaryEndData popped;
-    if ( !this->m_accountSummaryEnd.empty() ) {
-        popped = this->m_accountSummaryEnd.front();
-        this->m_accountSummaryEnd.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-VerifyMessageAPIData IbPosixClient::getVerifyMessageAPI() {
-    VerifyMessageAPIData popped;
-    if ( !this->m_verifyMessageAPIs.empty() ) {
-        popped = this->m_verifyMessageAPIs.front();
-        this->m_verifyMessageAPIs.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-VerifyCompletedData IbPosixClient::getVerifyCompleted() {
-    VerifyCompletedData popped;
-    if ( !this->m_verifyCompleted.empty() ) {
-        popped = this->m_verifyCompleted.front();
-        this->m_verifyCompleted.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-DisplayGroupListData IbPosixClient::getDisplayGroupList() {
-    DisplayGroupListData popped;
-    if ( !this->m_displayGroupLists.empty() ) {
-        popped = this->m_displayGroupLists.front();
-        this->m_displayGroupLists.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-DisplayGroupUpdatedData IbPosixClient::getDisplayGroupUpdated() {
-    DisplayGroupUpdatedData popped;
-    if ( !this->m_displayGroupUpdated.empty() ) {
-        popped = this->m_displayGroupUpdated.front();
-        this->m_displayGroupUpdated.pop();
-        return popped;
-    }
-    popped.isValid = false;
-    return popped;
-}
-CurrentTimeData IbPosixClient::getCurrentTime(){
-    CurrentTimeData popped;
-    if ( !this->m_currentTime.empty() ) {
-            popped = this->m_currentTime.front();
-            this->m_currentTime.pop();
-            return popped;
-        }
-    popped.isValid = false;
-    return popped;
-}
+
 JSONNode IbPosixClient::jsonifyContract(std::string name, const Contract& contract) {
     JSONNode c( JSON_NODE );
     c.set_name( name );
@@ -1201,6 +742,7 @@ JSONNode IbPosixClient::jsonifyContract(std::string name, const Contract& contra
 }
 JSONNode IbPosixClient::jsonifyUnderComp(const UnderComp& underComp) {
     JSONNode u( JSON_NODE );
+    u.set_name( "underComp" );
     u.push_back( JSONNode( "conId", underComp.conId ) );
     u.push_back( JSONNode( "delta", underComp.delta ) );
     u.push_back( JSONNode( "price", underComp.price ) );
@@ -1208,6 +750,7 @@ JSONNode IbPosixClient::jsonifyUnderComp(const UnderComp& underComp) {
 }
 JSONNode IbPosixClient::jsonifyContractDetails(const ContractDetails& cd) {
     JSONNode c( JSON_NODE );
+    c.set_name( "contractDetails" );
 
     c.push_back( jsonifyContract( "summary", cd.summary ) );
     c.push_back( JSONNode( "marketName", cd.marketName ) );
@@ -1378,8 +921,9 @@ JSONNode IbPosixClient::jsonifyOrderState(const OrderState& ostate) {
 }
 JSONNode IbPosixClient::jsonifyExecution(const Execution& execution) {
     JSONNode e( JSON_NODE );
+    e.set_name( "execution" );
     e.push_back( JSONNode( "execId", execution.execId ) );
-    e.push_back( JSONNode( "time", execution.time ) );
+    e.push_back( JSONNode( "timeString", execution.time ) );
     e.push_back( JSONNode( "acctNumber", execution.acctNumber ) );
     e.push_back( JSONNode( "exchange", execution.exchange ) );
     e.push_back( JSONNode( "side", execution.side ) );
@@ -1398,6 +942,7 @@ JSONNode IbPosixClient::jsonifyExecution(const Execution& execution) {
 }
 JSONNode IbPosixClient::jsonifyCommissionReport(const CommissionReport& cr) {
     JSONNode c( JSON_NODE );
+    c.set_name( "commissionReport" );
     c.push_back( JSONNode( "execId", cr.execId ) );
     c.push_back( JSONNode( "commission", cr.commission ) );
     c.push_back( JSONNode( "currency", cr.currency ) );
