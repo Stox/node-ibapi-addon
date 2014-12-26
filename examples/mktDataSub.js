@@ -35,7 +35,7 @@ msftContract.exchange = 'SMART';
 msftContract.primaryExchange = 'NASDAQ';
 msftContract.currency = 'USD';
 
-var api = new addon.NodeIBApi();
+var api = new addon.NodeIbapi();
 
 var handleValidOrderId = function (message, callback) {
   orderId = message.orderId;

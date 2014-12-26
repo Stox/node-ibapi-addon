@@ -22,7 +22,7 @@ NodeIbapi.prototype = {
     var messages = this.processMessage();
 
     if(Object.keys(messages).length == 0){
-      setTimeout(this._consumeMessages.bind(this), 25); // sleep a bit
+      setTimeout(this._consumeMessages.bind(this), 4); // sleep a bit
       return;
     }
 
@@ -47,82 +47,13 @@ NodeIbapi.prototype = {
     this.checkMessages();
     this.client.processMsg();
 
-
-
-    function checkMessage(messageId, objectData) {
-      if (objectData.isValid) {
-        messages[messageId] = objectData;
+    function checkMessage(objectData) {
+      if (objectData.messageId) {
+        messages[objectData.messageId] = objectData;
       }
     }
 
-    checkMessage(messageIds.tickPrice, this.client.getTickPrice());
-    checkMessage(messageIds.tickSize, this.client.getTickSize());
-    checkMessage(messageIds.tickOptionComputation,
-                 this.client.getTickOptionComputation());
-    checkMessage(messageIds.tickGeneric, this.client.getTickGeneric());
-    checkMessage(messageIds.tickString, this.client.getTickString());
-    checkMessage(messageIds.tickEFP, this.client.getTickEFP());
-    checkMessage(messageIds.orderStatus, this.client.getOrderStatus());
-    checkMessage(messageIds.openOrder, this.client.getOpenOrder());
-    checkMessage(messageIds.openOrderEnd, this.client.getOpenOrderEnd());
-    checkMessage(messageIds.clientError, this.client.getWinError());
-    checkMessage(messageIds.connectionClosed,
-                 this.client.getConnectionClosed());
-    checkMessage(messageIds.updateAccountValue,
-                 this.client.getUpdateAccountValue());
-    checkMessage(messageIds.updatePortfolio,
-                 this.client.getUpdatePortfolio());
-    checkMessage(messageIds.updateAccountTime,
-                 this.client.getUpdateAccountTime());
-    checkMessage(messageIds.accountDownloadEnd, 
-                 this.client.getAccountDownloadEnd());
-    checkMessage(messageIds.nextValidId, this.client.getNextValidId());
-    checkMessage(messageIds.contractDetails,
-                 this.client.getContractDetails());
-    checkMessage(messageIds.retBondContractDetails,
-                 this.client.getBondContractDetails());
-    checkMessage(messageIds.contractDetailsEnd,
-                 this.client.getContractDetailsEnd());
-    checkMessage(messageIds.execDetails, this.client.getExecDetails());
-    checkMessage(messageIds.execDetailsEnd, this.client.getExecDetailsEnd());
-    checkMessage(messageIds.svrError, this.client.getError());
-    checkMessage(messageIds.updateMktDepth, this.client.getUpdateMktDepth());
-    checkMessage(messageIds.updateMktDepthL2,
-                 this.client.getUpdateMktDepthL2());
-    checkMessage(messageIds.updateNewsBulletin,
-                 this.client.getUpdateNewsBulletin());
-    checkMessage(messageIds.managedAccounts,
-                 this.client.getManagedAccounts());
-    checkMessage(messageIds.receiveFA, this.client.getReceiveFA());
-    checkMessage(messageIds.historicalData, this.client.getHistoricalData());
-    checkMessage(messageIds.scannerParameters,
-                 this.client.getScannerParameters());
-    checkMessage(messageIds.scannerData, this.client.getScannerData());
-    checkMessage(messageIds.scannerDataEnd, this.client.getScannerDataEnd());
-    checkMessage(messageIds.realtimeBar, this.client.getRealtimeBar());
-    checkMessage(messageIds.fundamentalData,
-                 this.client.getFundamentalData());
-    checkMessage(messageIds.deltaNeutralValidation,
-                 this.client.getDeltaNeutralValidation());
-    checkMessage(messageIds.tickSnapshotEnd,
-                 this.client.getTickSnapshotEnd());
-    checkMessage(messageIds.marketDataType, this.client.getMarketDataType());
-    checkMessage(messageIds.commissionReport,
-                 this.client.getCommissionReport());
-    checkMessage(messageIds.position, this.client.getPosition());
-    checkMessage(messageIds.positionEnd, this.client.getPositionEnd());
-    checkMessage(messageIds.accountSummary, this.client.getAccountSummary());
-    checkMessage(messageIds.accountSummaryEnd,
-                 this.client.getAccountSummaryEnd());
-    checkMessage(messageIds.verifyMessageAPI,
-                 this.client.getVerifyMessageAPI());
-    checkMessage(messageIds.verifyCompleted,
-                 this.client.getVerifyCompleted());
-    checkMessage(messageIds.displayGroupList,
-                 this.client.getDisplayGroupList());
-    checkMessage(messageIds.displayGroupUpdated,
-                 this.client.getDisplayGroupUpdated());
-    checkMessage(messageIds.currentTime, this.client.getCurrentTime());
+    checkMessage(this.client.getInboundMsg());
 
     if (!this.isConnected()) {
       messages[messageIds.disconnected] = {};
