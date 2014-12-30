@@ -5,19 +5,21 @@ Interactive Brokers API addon for Node.js compatible with IB API 9.71
 
 This addon uses the latest stable Interactive Brokers POSIX C++ API.
 
-Note:
-The inbound messages' are in the order it was received. Also, the outbound 
-messages are rate limited to 50 msg/sec as IB requires it.
-Default behavior is that if your outbound rate is greater than that the 
-51st message will be handled in the next second.
-
 Author: Jae Yang - [dchem] (https://github.com/dchem/)
 
 For direct JavaScript implementation of IB API for Node.js, please visit 
 Pilwon Huh's [node-ib] (https://github.com/pilwon/node-ib).
 
 ### Important
+####Note:
+The inbound messages' are in the order it was received. Also, the outbound 
+messages are rate limited to 50 msg/sec as IB requires it.
+Default behavior is that if your outbound rate is greater than that the 
+51st message will be handled in the next second.
 
+####WARNING:
+If you have legacy code from before 0.2.0, use 0.1.23 if you don't want to 
+migrate your code.
 
 ### Change Notes:
 
