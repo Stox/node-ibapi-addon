@@ -23,7 +23,7 @@ migrate your code.
 
 ### Change Notes:
 
-* 2014-11-14 - 0.2.0  - Uses event handlers instead of event emitters
+* 2014-12-29 - 0.2.1  - Uses event handlers instead of event emitters
 * 2014-11-12 - 0.1.23 - Includes lib into the package itself
 * 2014-09-10 - 0.1.21 - Supports API 9.71
 * 2014-09-09 - 0.1.19 - Adds order.js and placeOrder can use order obj
