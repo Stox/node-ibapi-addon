@@ -8,11 +8,11 @@
 #include <queue>
 #include <utility>
 #include "EWrapperStore.h"
+#include "import/libjson/_internal/Source/JSONNode.h"
 
 class EPosixClientSocket;
 struct ExecutionFilter;
 struct ScannerSubscription;
-class JSONNode;
 
 class IbPosixClient : public EWrapper {
 public:
