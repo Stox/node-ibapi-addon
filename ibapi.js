@@ -22,7 +22,7 @@ NodeIbapi.prototype = {
     var messages = this.processMessage();
 
     if(Object.keys(messages).length == 0){
-      setTimeout(this._consumeMessages.bind(this), 4); // sleep a bit
+      setTimeout(this._consumeMessages.bind(this), 20); // sleep a bit
       return;
     }
 
