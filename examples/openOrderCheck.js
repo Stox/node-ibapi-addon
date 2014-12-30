@@ -1,30 +1,15 @@
 // In this example, we will try to place a limit order and to 
 //  receive the orderStatus, as well as to poll for openOrders.
-// This example will use Node.js's built in event handlers
 
-var ibapi = require('../ibapi');
-var ibcontract = ibapi.contract;
-var client = new ibapi.addon.NodeIbapi();
+var addon = require('../ibapi'),
+  messageIds = addon.messageIds,
+  contract = addon.contract,
+  order = addon.order;
 
+var api = new addon.NodeIbapi();
 var orderId = -1;
-var counter = 0;
-var ready = false;
 
-var isOrderPlaced = false;
-
-var processIbMsg = function () {
-  client.processIbMsg();
-}
-var doReqFunc = function () {
-  client.doReqFunc();
-}
-var doOpenOrderReq = function () {
-  client.reqOpenOrders();
-}
-var disconnectClient = function () {
-  client.disconnect();
-}
-var msftContract = ibcontract.createContract();
+var msftContract = contract.createContract();
 msftContract.symbol = 'MSFT';
 msftContract.secType = 'STK';
 msftContract.exchange = 'SMART';
@@ -34,65 +19,72 @@ msftContract.currency = 'USD';
 var placeThatOrder = function () {
     console.log('Next valid order Id: %d',orderId);
     console.log("Placing order for MSFT");
-    client.placeOrder(orderId, msftContract, "BUY", 1000, "LMT", 0.11, 0.11);
+    var oldId = orderId;
     orderId = orderId + 1;
-    isOrderPlaced = true;
+    setImmediate(api.placeSimpleOrder.bind(
+      api, oldId, msftContract, "BUY", 1000, "LMT", 0.11, 0.11));
 }
-var cancelPrevOrder = function () {
-  if (isOrderPlaced) {
-    console.log('canceling order: %d', orderId-1);
-    client.cancelOrder(orderId-1);
-    isOrderPlaced = false;
-  }
+var cancelPrevOrder = function (prevOrderId) {
+  console.log('canceling order: %d', prevOrderId);
+  setImmediate(api.cancelOrder.bind(api, prevOrderId));
 }
 
-client.on('connected', function () {
-  console.log('connected');
-  setInterval(processIbMsg,0.1);
-})
-.once('nextValidId', function (data) {
-  orderId = data.orderId;
-  setInterval(function () {client.funcQueue.push(doOpenOrderReq);},200);
-  setInterval(function () {client.funcQueue.push(placeThatOrder);},1000);
-  setInterval(function () {client.funcQueue.push(cancelPrevOrder);},1000);
-  setInterval(doReqFunc,200);
-  setTimeout(disconnectClient,9001);
-})
-.on('orderStatus',function (orderStatus) { 
-  console.log("OrderID, status, filled, remaining, avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld");
-  console.log( 
-    orderStatus.orderId.toString() + " " + orderStatus.status.toString() + " " +
-    orderStatus.filled.toString() + " " + orderStatus.remaining.toString() + " " +
-    orderStatus.avgFillPrice.toString() + " " + orderStatus.permId.toString() + " " +
-    orderStatus.parentId.toString() + " " + orderStatus.lastFillPrice.toString() + " " +
-    orderStatus.clientId.toString() + " " + orderStatus.whyHeld.toString()
-  );
-})
-.on('openOrder', function (openOrder) {
-  console.log("OrderId, status, initMargin, maintMargin, equityWithLoan, Commission, minCommission, maxCommission, commissionCurrency, warningText");
-  console.log(
-      openOrder.orderId.toString() + " " + 
-      openOrder.status.toString() + " " + 
-      openOrder.initMargin.toString() + " " + 
-      openOrder.maintMargin.toString() + " " + 
-      openOrder.equityWithLoan.toString() + " " + 
-      openOrder.commission.toString() + " " + 
-      openOrder.minCommission.toString() + " " + 
-      openOrder.maxCommission.toString() + " " + 
-      openOrder.commissionCurrency.toString() + " " + 
-      openOrder.warningText.toString() 
-  );
-})
-.on('clientError', function (clientError) {
-  console.log('Client error' + clientError.id.toString());
-})
-.on('svrError', function (svrError) {
-  console.log('Error: ' + svrError.id.toString() + ' - ' + 
-    svrError.errorCode.toString() + ' - ' + svrError.errorString.toString());
-})
-.on('disconnected', function () {
+var handleValidOrderId = function (message, callback) {
+  orderId = message.orderId;
+  console.log('next order Id is ' + orderId);
+  setInterval(placeThatOrder, 1000);
+  callback();
+};
+
+var handleServerError = function (message, callback) {
+  console.log('Error: ' + message.id.toString() + '-' +
+              message.errorCode.toString() + '-' +
+              message.errorString.toString());
+  callback();
+};
+
+var handleClientError = function (message, callback) {
+  console.log('clientError');
+  console.log(JSON.stringify(message));
+  callback();
+};
+
+var handleDisconnected = function (message, callback) {
   console.log('disconnected');
+  callback();
   process.exit(1);
-})
+};
 
-client.connectToIb('127.0.0.1',7496,0);
+var handleOrderStatus = function (message, callback) {
+  console.log('OrderStatus: ');
+  console.log(JSON.stringify(message));
+  if (message.status == "PreSubmitted")
+    cancelPrevOrder(message.orderId);
+  callback();
+};
+
+var handleOpenOrder = function (message, callback) {
+  console.log('OpenOrder: ');
+  console.log(JSON.stringify(message));
+  callback();
+};
+
+var handleOpenOrderEnd = function (message, callback) {
+  console.log('OpenOrderEnd: ');
+  console.log(JSON.stringify(message));
+  callback();
+};
+
+api.handlers[messageIds.nextValidId] = handleValidOrderId;
+api.handlers[messageIds.svrError] = handleServerError;
+api.handlers[messageIds.clientError] = handleClientError;
+api.handlers[messageIds.disconnected] = handleDisconnected;
+api.handlers[messageIds.orderStatus] = handleOrderStatus;
+api.handlers[messageIds.openOrder] = handleOpenOrder;
+api.handlers[messageIds.openOrderEnd] = handleOpenOrder;
+
+var connected = api.connect('127.0.0.1', 7496, 0);
+
+if (connected) {
+  api.beginProcessing();
+}

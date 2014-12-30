@@ -1,239 +1,396 @@
 // module for event driven methods
-var addon = require('./build/Release/NodeIbapiAddon');
-var contract = require('./lib/contract');
-var order = require('./lib/order');
-var execution = require('./lib/execution');
-var contractDetails = require('./lib/contractDetails');
-var scannerSubscription = require('./lib/scannerSubscription');
-var events = require ("events");
-var util = require ("util");
+var addon = require('./build/Release/NodeIbapiAddon'),
+  contract = require('./lib/contract'),
+  order = require('./lib/order'),
+  execution = require('./lib/execution'),
+  contractDetails = require('./lib/contractDetails'),
+  scannerSubscription = require('./lib/scannerSubscription'),
+  messageIds = require('./messageIds'),
+  async = require("async"),
+  RateLimiter = require("limiter").RateLimiter;
 
-for (var key in events.EventEmitter.prototype) {
-  addon.NodeIbapi.prototype[key] = events.EventEmitter.prototype[key];
+function NodeIbapi() {
+  this.client = new addon.NodeIbapi();
+  this.limiter = new RateLimiter(50, 'second');
+  this.handlers = {};
+  this.isProcessing=false;
 }
 
-addon.NodeIbapi.prototype.funcQueue = [];
+NodeIbapi.prototype = {
 
-addon.NodeIbapi.prototype.addReqId = function () {
-  this.reqIds(1);
-}
+  _consumeMessages: function () {
+    var messages = this.processMessage();
 
-addon.NodeIbapi.prototype.doReqFunc = function () {
-  if (this.funcQueue[0] != null) {
-      (this.funcQueue.shift())();
-  } 
-}
+    if(Object.keys(messages).length == 0){
+      setTimeout(this._consumeMessages.bind(this), 20); // sleep a bit
+      return;
+    }
 
-addon.NodeIbapi.prototype.processIbMsg = function () {
-  this.checkMessages();
-  this.processMsg();
+    async.eachSeries(Object.keys(messages), function (key, cb) {
+      if (key in this.handlers) {
+        var handler = this.handlers[key];
+        var message = messages[key];
+        return handler(message, cb);
+      }
+      return cb();
+    }.bind(this), function (err) {
+      if (err) {
+        console.error(err);
+        throw err;
+      }
+      setImmediate(this._consumeMessages.bind(this));
+    }.bind(this));
+  },
 
-  retTickPrice = this.getTickPrice();
-  retTickSize = this.getTickSize();
-  retTickOptionComputation = this.getTickOptionComputation();
-  retTickGeneric = this.getTickGeneric();
-  retTickString = this.getTickString();
-  retTickEFP = this.getTickEFP();
-  retOrderStatus = this.getOrderStatus();
-  retOpenOrder = this.getOpenOrder();
-  retOpenOrderEnd = this.getOpenOrderEnd();
-  retWinError = this.getWinError();
-  retConnectionClosed = this.getConnectionClosed();
-  retUpdateAccountValue = this.getUpdateAccountValue();
-  retUpdatePortfolio = this.getUpdatePortfolio();
-  retUpdateAccountTime = this.getUpdateAccountTime();
-  retAccountDownloadEnd = this.getAccountDownloadEnd();
-  retNextValidId = this.getNextValidId();
-  retContractDetails = this.getContractDetails();
-  retBondContractDetails = this.getBondContractDetails();
-  retContractDetailsEnd = this.getContractDetailsEnd();
-  retExecDetails = this.getExecDetails();
-  retExecDetailsEnd = this.getExecDetailsEnd();
-  retError = this.getError();
-  retUpdateMktDepth = this.getUpdateMktDepth();
-  retUpdateMktDepthL2 = this.getUpdateMktDepthL2();
-  retUpdateNewsBulletin = this.getUpdateNewsBulletin();
-  retManagedAccounts = this.getManagedAccounts();
-  retReceiveFA = this.getReceiveFA();
-  retHistoricalData = this.getHistoricalData();
-  retScannerParameters = this.getScannerParameters();
-  retScannerData = this.getScannerData();
-  retScannerDataEnd = this.getScannerDataEnd();
-  retRealtimeBar = this.getRealtimeBar();
-  retFundamentalData = this.getFundamentalData();
-  retDeltaNeutralValidation = this.getDeltaNeutralValidation();
-  retTickSnapshotEnd = this.getTickSnapshotEnd();
-  retMarketDataType = this.getMarketDataType();
-  retCommissionReport = this.getCommissionReport();
-  retPosition = this.getPosition();
-  retPositionEnd = this.getPositionEnd();
-  retAccountSummary = this.getAccountSummary();
-  retAccountSummaryEnd = this.getAccountSummaryEnd();
-  retVerifyMessageAPI = this.getVerifyMessageAPI();
-  retVerifyCompleted = this.getVerifyCompleted();
-  retDisplayGroupList = this.getDisplayGroupList();
-  retDisplayGroupUpdated = this.getDisplayGroupUpdated();
+  processMessage: function () {
+    var messages = {};
+    this.checkMessages();
+    this.client.processMsg();
 
-  if (retTickPrice.isValid) {
-    this.emit('tickPrice', retTickPrice);
-  }
-  if (retTickSize.isValid) {
-    this.emit('tickSize', retTickSize);
-  }
-  if (retTickOptionComputation.isValid) {
-    this.emit('tickOptionComputation', retTickOptionComputation);
-  }
-  if (retTickGeneric.isValid) {
-    this.emit('tickGeneric', retTickGeneric);
-  }
-  if (retTickString.isValid) {
-    this.emit('tickString', retTickString);
-  }
-  if (retTickEFP.isValid) {
-    this.emit('tickEFP', retTickEFP);
-  }
-  if (retOrderStatus.isValid) {
-    this.emit('orderStatus', retOrderStatus);
-  }
-  if (retOpenOrder.isValid) {
-    this.emit('openOrder', retOpenOrder);
-  }
-  if (retOpenOrderEnd.isValid) {
-    this.emit('openOrderEnd', retOpenOrderEnd);
-  }
-  if (retWinError.isValid) {
-    this.emit('clientError', retWinError);
-  }
-  if (retConnectionClosed.isValid) {
-    this.emit('connectionClosed', retConnectionClosed);
-  }
-  if (retUpdateAccountValue.isValid) {
-    this.emit('updateAccountValue', retUpdateAccountValue);
-  }
-  if (retUpdatePortfolio.isValid) {
-    this.emit('updatePortfolio', retUpdatePortfolio);
-  }
-  if (retUpdateAccountTime.isValid) {
-    this.emit('updateAccountTime', retUpdateAccountTime);
-  }
-  if (retAccountDownloadEnd.isValid) {
-    this.emit('accountDownloadEnd', retAccountDownloadEnd);
-  }
-  if (retNextValidId.isValid) {
-    this.emit('nextValidId', retNextValidId);
-  }
-  if (retContractDetails.isValid) {
-    this.emit('contractDetails', retContractDetails);
-  }
-  if (retBondContractDetails.isValid) {
-    this.emit('bondContractDetails', retBondContractDetails);
-  }
-  if (retContractDetailsEnd.isValid) {
-    this.emit('contractDetailsEnd', retContractDetailsEnd);
-  }
-  if (retExecDetails.isValid) {
-    this.emit('execDetails', retExecDetails);
-  }
-  if (retExecDetailsEnd.isValid) {
-    this.emit('execDetailsEnd', retExecDetailsEnd);
-  }
-  if (retError.isValid) {
-    this.emit('svrError', retError);
-  }
-  if (retUpdateMktDepth.isValid) {
-    this.emit('updateMktDepth', retUpdateMktDepth);
-  }
-  if (retUpdateMktDepthL2.isValid) {
-    this.emit('updateMktDepthL2', retUpdateMktDepthL2);
-  }
-  if (retUpdateNewsBulletin.isValid) {
-    this.emit('updateNewsBulletin', retUpdateNewsBulletin);
-  }
-  if (retManagedAccounts.isValid) {
-    this.emit('managedAccounts', retManagedAccounts);
-  }
-  if (retReceiveFA.isValid) {
-    this.emit('receiveFA', retReceiveFA);
-  }
-  if (retHistoricalData.isValid) {
-    this.emit('historicalData', retHistoricalData);
-  }
-  if (retScannerParameters.isValid) {
-    this.emit('scannerParameters', retScannerParameters);
-  }
-  if (retScannerData.isValid) {
-    this.emit('scannerData', retScannerData);
-  }
-  if (retScannerDataEnd.isValid) {
-    this.emit('scannerDataEnd', retScannerDataEnd);
-  }
-  if (retRealtimeBar.isValid) {
-    this.emit('realtimeBar', retRealtimeBar);
-  }
-  if (retFundamentalData.isValid) {
-    this.emit('fundamentalData', retFundamentalData);
-  }
-  if (retDeltaNeutralValidation.isValid) {
-    this.emit('deltaNeutralValidation', retDeltaNeutralValidation);
-  }
-  if (retTickSnapshotEnd.isValid) {
-    this.emit('tickSnapshotEnd', retTickSnapshotEnd);
-  }
-  if (retMarketDataType.isValid) {
-    this.emit('marketDataType', retMarketDataType);
-  }
-  if (retCommissionReport.isValid) {
-    this.emit('commissionReport', retCommissionReport);
-  }
-  if (retPosition.isValid) {
-    this.emit('position', retPosition);
-  }
-  if (retPositionEnd.isValid) {
-    this.emit('positionEnd', retPositionEnd);
-  }
-  if (retAccountSummary.isValid) {
-    this.emit('accountSummary', retAccountSummary);
-  }
-  if (retAccountSummaryEnd.isValid) {
-    this.emit('accountSummaryEnd', retAccountSummaryEnd);
-  }
-  if (retNextValidId.isValid) {
-    this.emit('nextValidId', retNextValidId);
-  }
-  if (retVerifyMessageAPI.isValid) {
-    this.emit('verifyMessageAPI', retVerifyMessageAPI);
-  }
-  if (retVerifyCompleted.isValid) {
-    this.emit('verifyCompleted', retVerifyCompleted);
-  }
-  if (retDisplayGroupList.isValid) {
-    this.emit('displayGroupList', retDisplayGroupList);
-  }
-  if (retDisplayGroupUpdated.isValid) {
-    this.emit('displayGroupUpdated', retDisplayGroupUpdated);
-  }
+    function checkMessage(objectData) {
+      if (objectData.messageId) {
+        messages[objectData.messageId] = objectData;
+      }
+    }
 
-  if (!this.isConnected())
-    this.emit('disconnected');
-}
+    checkMessage(this.client.getInboundMsg());
 
-addon.NodeIbapi.prototype.connectToIb = function (host,port,clientId) {
-  if (this.connect(host,port,clientId))
-    this.emit('connected');
-  else
-    this.emit('connectionFail');
-}
+    if (!this.isConnected()) {
+      messages[messageIds.disconnected] = {};
+    }
+
+    return messages;
+  },
+
+  connect: function (host, port, clientId) {
+    return this.client.connect(host, port, clientId)
+  },
+
+  beginProcessing: function () {
+    if (!this.isProcessing) {
+      this._consumeMessages();
+      this.isProcessing = true;
+    }
+  },
+
+  disconnect: function () {
+    this.doAction( function () {
+      this.client.disconnect();
+    });
+  },
+
+  isConnected: function () {
+    return this.client.isConnected();
+  },
+
+  serverVersion: function () {
+    return this.client.serverVersion();
+  },
+
+  twsConnectionTime: function () {
+    return this.client.twsConnectionTime();
+  },
+
+  reqMktData: function (reqId, contract, genericTickType, snapShot) {
+    this.doAction( function () {
+      this.client.reqMktData(reqId, contract, genericTickType, snapShot);
+    });
+  },
+
+  cancelMktData: function (reqId) {
+    this.doAction( function () {
+      this.client.cancelMktData(reqId);
+    });
+  },
+
+  placeOrder: function (orderId, contract, order) {
+    this.doAction( function () {
+      this.client.placeOrder(orderId, contract, order);
+    });
+  },
+
+  placeSimpleOrder: function (orderId, contract, action, quantity,
+                                 orderType, price, auxPrice) {
+    this.doAction( function () {
+      this.client.placeOrder( orderId, contract, action, quantity, orderType,
+                              price, auxPrice);
+    });
+  },
+
+  cancelOrder: function (orderId) {
+    this.doAction( function () {
+      this.client.cancelOrder(orderId);
+    });
+  },
+
+  reqOpenOrders: function () {
+    this.doAction( function () {
+      this.client.reqOpenOrders();
+    });
+  },
+
+  reqAccountUpdates: function (subscribe, acctCode) {
+    this.doAction( function () {
+      this.client.reqAccountUpdates(subscribe, acctCode);
+    });
+  },
+
+  reqExecutions: function (reqId, clientId, acctCode, time,
+                           symbol, secType, exchange, side) {
+    this.doAction( function () {
+      this.client.reqExecutions(reqId, clientId, acctCode, time,
+                                symbol, secType, exchange, side);
+    });
+  },
+
+  checkMessages: function () {
+    this.doAction( function () { this.client.checkMessages(); });
+  },
+
+  reqContractDetails: function (reqId, contract) {
+    this.doAction( function () {
+      this.client.reqContractDetails(reqId, contract);
+    });
+  },
+
+  reqMktDepth: function (tickerId, contract, numRows) {
+    this.doAction( function () {
+      this.client.reqMktDepth(tickerId, contract, numRows);
+    });
+  },
+
+  cancelMktDepth: function (tickerId) {
+    this.doAction( function () {
+      this.client.cancelMktDepth(tickerId);
+    });
+  },
+
+  reqNewsBulletins: function (allMsgs) {
+    this.doAction( function () {
+      this.client.reqNewsBulletins(allMsgs);
+    });
+  },
+
+  cancelNewsBulletins: function () {
+    this.doAction( function () {
+      this.client.cancelNewsBulletins();
+    });
+  },
+
+  setServerLogLevel: function (level) {
+    this.doAction( function () {
+      this.client.setServerLogLevel(level);
+    });
+  },
+
+  reqAutoOpenOrders: function (bAutoBind) {
+    this.doAction( function () {
+      this.client.reqAutoOpenOrders(bAutoBind);
+    });
+  },
+
+  reqAllOpenOrders: function () {
+    this.doAction( function () {
+      this.client.reqAllOpenOrders();
+    });
+  },
+
+  reqManagedAccts: function () {
+    this.doAction( function () {
+      this.client.reqManagedAccts();
+    });
+  },
+
+  reqHistoricalData: function (id, contract, endDateTime,
+                               durationStr, barSizeSetting,
+                               whatToShow, useRTH, formatDate) {
+    this.doAction( function () {
+      this.client.reqHistoricalData(id, contract, endDateTime,
+                                    durationStr, barSizeSetting,
+                                    whatToShow, useRTH, formatDate);
+    });
+  },
+
+  exerciseOptions: function (tickerId, contract, exerciseAction,
+                             exerciseQuantity, account, override) {
+    this.doAction( function () {
+      this.client.exerciseOptions(tickerId, contract, exerciseAction,
+                                  exerciseQuantity, account, override);
+    });
+  },
+
+  cancelHistoricalData: function (tickerId) {
+    this.doAction( function () {
+      this.client.cancelHistoricalData(tickerId);
+    });
+  },
+
+  reqRealtimeBars: function (tickerId, contract, barSize,
+                             whatToShow, useRTH) {
+    this.doAction( function () {
+      this.client.reqRealtimeBars(tickerId, contract, barSize,
+                                  whatToShow, useRTH);
+    });
+  },
+
+  cancelRealTimeBars: function (tickerId) {
+    this.doAction( function () {
+      this.client.cancelRealTimeBars(tickerId);
+    });
+  },
+
+  cancelScannerSubscription: function (tickerId) {
+    this.doAction( function () {
+      this.client.cancelScannerSubscription(tickerId);
+    });
+  },
+
+  reqScannerParameters: function () {
+    this.doAction( function () {
+      this.client.reqScannerParameters();
+    });
+  },
+
+  reqScannerSubscription: function (tickerId, subscription) {
+    this.doAction( function () {
+      this.client.reqScannerSubscription(tickerId, subscription);
+    });
+  },
+
+  reqFundamentalData: function (reqId, contract, reportType) {
+    this.doAction( function () {
+      this.client.reqFundamentalData(reqId, contract, reportType);
+    });
+  },
+
+  cancelFundamentalData: function (reqId) {
+    this.doAction( function () {
+      this.client.cancelFundamentalData(reqId);
+    });
+  },
+
+  calculateImpliedVolatility: function (reqId, contract, optionPrice,
+                                        underPrice) {
+    this.doAction( function () {
+      this.client.calculateImpliedVolatility(reqId, contract, optionPrice, 
+                                             underPrice);
+    });
+  },
+
+  calculateOptionPrice: function (reqId, contract, volatility, underPrice) {
+    this.doAction( function () {
+      this.client.calculateOptionPrice(reqId, contract,
+                                       volatility, underPrice);
+    });
+  },
+
+  cancelCalculateImpliedVolatility: function (reqId) {
+    this.doAction( function () {
+      this.client.cancelCalculateImpliedVolatility(reqId);
+    });
+  },
+
+  cancelCalculateOptionPrice: function (reqId) {
+    this.doAction( function () {
+      this.client.cancelCalculateOptionPrice(reqId);
+    });
+  },
+
+  reqGlobalCancel: function () {
+    this.doAction( function () {
+      this.client.reqGlobalCancel();
+    });
+  },
+
+  reqMarketDataType: function (marketDataType) {
+    this.doAction( function () {
+      this.client.reqMarketDataType(marketDataType);
+    });
+  },
+
+  reqPositions: function () {
+    this.doAction( function () {
+      this.client.reqPositions();
+    });
+  },
+
+  cancelPositions: function () {
+    this.doAction( function () {
+      this.client.cancelPositions();
+    });
+  },
+
+  reqAccountSummary: function (reqId, groupName, tags) {
+    this.doAction( function () {
+      this.client.reqAccountSummary(reqId, groupName, tags);
+    });
+  },
+
+  cancelAccountSummary: function (reqId) {
+    this.doAction( function () {
+      this.client.cancelAccountSummary(reqId);
+    });
+  },
+
+  verifyRequest: function (apiName, apiVersion) {
+    this.doAction( function () {
+      this.client.verifyRequest(apiName, apiVersion);
+    });
+  },
+
+  verifyMessage: function (apiData) {
+    this.doAction( function () {
+      this.client.verifyMessage(apiData);
+    });
+  },
+
+  queryDisplayGroups: function (reqId) {
+    this.doAction( function () {
+      this.client.queryDisplayGroups(reqId);
+    });
+  },
+
+  subscribeToGroupEvents: function (reqId, groupId) {
+    this.doAction( function () {
+      this.client.subscribeToGroupEvents(reqId, groupId);
+    });
+  },
+
+  updateDisplayGroup: function (reqId, contractInfo) {
+    this.doAction( function () {
+      this.client.updateDisplayGroup(reqId, contractInfo);
+    });
+  },
+
+  unsubscribeFromGroupEvents: function (reqId) {
+    this.doAction( function () {
+      this.client.unsubscribeFromGroupEvents(reqId);
+    });
+  },
+
+  reqIds: function (numIds) {
+    this.doAction( function () {
+      this.client.reqIds(numIds);
+    });
+  },
+
+  reqCurrentTime: function () {
+    this.doAction(function () { this.client.reqCurrentTime(); });
+  },
+
+  doAction: function (action) {
+    this.limiter.removeTokens(1, function (err, remainingRequests) {
+      action.bind(this)();
+    }.bind(this));
+  }
+};
 
 exports = module.exports = {
-  NodeIbapi: function() {
-    console.log("DEPRECATED: calling NodeIbapi() directly from " + 
-      "package is being deprecated. Please call it from " + 
-      "'addon'. See barebones.js in examples folder.");
-    return addon.NodeIbapi;}(),
-  addon: addon,
-  contract: contract,
-  execution: execution,
-  scannerSubscription: scannerSubscription,
-  contractDetails: contractDetails,
-  order: order
+  "NodeIbapi": NodeIbapi,
+  "messageIds": messageIds,
+  "contract": contract,
+  "execution": execution,
+  "scannerSubscription": scannerSubscription,
+  "contractDetails": contractDetails,
+  "order": order
 };

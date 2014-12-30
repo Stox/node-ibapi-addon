@@ -8,6 +8,7 @@
 #include <queue>
 #include <utility>
 #include "EWrapperStore.h"
+#include "import/libjson/_internal/Source/JSONNode.h"
 
 class EPosixClientSocket;
 struct ExecutionFilter;
@@ -95,7 +96,6 @@ public:
     void updateDisplayGroup( int reqId, const IBString& contractInfo);
     void unsubscribeFromGroupEvents( int reqId);
 
-
 // EWrapper
 public:
     void tickPrice( TickerId tickerId, TickType field, double price, 
@@ -179,104 +179,22 @@ public:
     void displayGroupUpdated( int reqId, const IBString& contractInfo);
 
 // accessors
-    TickPriceData getTickPrice(); 
-    TickSizeData getTickSize(); 
-    TickOptionComputationData getTickOptionComputation(); 
-    TickGenericData getTickGeneric(); 
-    TickStringData getTickString(); 
-    TickEFPData getTickEFP(); 
-    OrderStatusData getOrderStatus(); 
-    OpenOrderData getOpenOrder(); 
-    OpenOrderEndData getOpenOrderEnd(); 
-    WinErrorData getWinError(); 
-    ConnectionClosedData getConnectionClosed(); 
-    UpdateAccountValueData getUpdateAccountValue(); 
-    UpdatePortfolioData getUpdatePortfolio(); 
-    UpdateAccountTimeData getUpdateAccountTime(); 
-    AccountDownloadEndData getAccountDownloadEnd(); 
-    NextValidIdData getNextValidId(); 
-    ContractDetailsData getContractDetails(); 
-    BondContractDetailsData getBondContractDetails(); 
-    ContractDetailsEndData getContractDetailsEnd(); 
-    ExecDetailsData getExecDetails(); 
-    ExecDetailsEndData getExecDetailsEnd(); 
-    ErrorData getError(); 
-    UpdateMktDepthData getUpdateMktDepth(); 
-    UpdateMktDepthL2Data getUpdateMktDepthL2(); 
-    UpdateNewsBulletinData getUpdateNewsBulletin(); 
-    ManagedAccountsData getManagedAccounts(); 
-    ReceiveFAData getReceiveFA(); 
-    HistoricalDataData getHistoricalData(); 
-    ScannerParametersData getScannerParameters(); 
-    ScannerDataData getScannerData(); 
-    ScannerDataEndData getScannerDataEnd(); 
-    RealtimeBarData getRealtimeBar(); 
-    // std::string geturrentTime() ;
-    FundamentalDataData getFundamentalData(); 
-    DeltaNeutralValidationData getDeltaNeutralValidation(); 
-    TickSnapshotEndData getTickSnapshotEnd(); 
-    MarketDataTypeData getMarketDataType(); 
-    CommissionReportData getCommissionReport(); 
-    PositionData getPosition(); 
-    PositionEndData getPositionEnd(); 
-    AccountSummaryData getAccountSummary(); 
-    AccountSummaryEndData getAccountSummaryEnd();
-    VerifyMessageAPIData getVerifyMessageAPI();
-    VerifyCompletedData getVerifyCompleted();
-    DisplayGroupListData getDisplayGroupList();
-    DisplayGroupUpdatedData getDisplayGroupUpdated();
+    JSONNode getInboundMsg();
 
 private:
     std::auto_ptr<EPosixClientSocket> m_pClient;
 
 ///// node.js accessible
+    std::queue< JSONNode > m_inboundMsgs;
 
-    std::queue< TickPriceData > m_tickPrices;
-    std::queue< TickSizeData > m_tickSizes;
-    std::queue< TickOptionComputationData > m_tickOptionComps;
-    std::queue< TickGenericData > m_tickGenerics;
-    std::queue< TickStringData > m_tickStrings;
-    std::queue< TickEFPData > m_tickEFPs;
-    std::queue< OrderStatusData > m_orderStatuses;
-    std::queue< OpenOrderData > m_openOrders;
-    std::queue< OpenOrderEndData > m_openOrderEnd;
-    std::queue< WinErrorData > m_winErrors;
-    std::queue< ConnectionClosedData > m_connectionClosed;
-    std::queue< UpdateAccountValueData > m_updateAccountValues;
-    std::queue< UpdatePortfolioData > m_updatePortfolios;
-    std::queue< UpdateAccountTimeData > m_updateAccountTimes;
-    std::queue< AccountDownloadEndData > m_accountDownloadEnds;
-    std::queue< NextValidIdData > m_validId;
-    std::queue< ContractDetailsData > m_contractDetails;
-    std::queue< BondContractDetailsData > m_bondContractDetails;
-    std::queue< ContractDetailsEndData > m_contractDetailsEnd;
-    std::queue< ExecDetailsData > m_execDetails;
-    std::queue< ExecDetailsEndData > m_execDetailsEnd;
-    std::queue< ErrorData > m_errors;
-    std::queue< UpdateMktDepthData > m_updateMktDepths;
-    std::queue< UpdateMktDepthL2Data > m_updateMktDepthL2s;
-    std::queue< UpdateNewsBulletinData > m_updateNewsBulletins;
-    std::queue< ManagedAccountsData > m_managedAccounts;
-    std::queue< ReceiveFAData > m_receiveFAs;
-    std::queue< HistoricalDataData > m_historicalData;
-    std::queue< ScannerParametersData > m_scannerParameters;
-    std::queue< ScannerDataData > m_scannerData;
-    std::queue< ScannerDataEndData > m_scannerDataEnd;
-    std::queue< RealtimeBarData > m_realtimeBars;
-    // std::string m_currentTime;
-    std::queue< FundamentalDataData > m_fundamentalData;
-    std::queue< DeltaNeutralValidationData > m_deltaNeutralValidations;
-    std::queue< TickSnapshotEndData > m_tickSnapshotEnds;
-    std::queue< MarketDataTypeData > m_marketDataTypes;
-    std::queue< CommissionReportData > m_commissionReports;
-    std::queue< PositionData > m_positions;
-    std::queue< PositionEndData > m_positionEnd;
-    std::queue< AccountSummaryData > m_accountSummaries;
-    std::queue< AccountSummaryEndData > m_accountSummaryEnd;
-    std::queue< VerifyMessageAPIData > m_verifyMessageAPIs;
-    std::queue< VerifyCompletedData > m_verifyCompleted;
-    std::queue< DisplayGroupListData > m_displayGroupLists;
-    std::queue< DisplayGroupUpdatedData > m_displayGroupUpdated;
+//// helper methods
+    JSONNode jsonifyContract(std::string name, const Contract& contract);
+    JSONNode jsonifyUnderComp(const UnderComp& underComp);
+    JSONNode jsonifyContractDetails(const ContractDetails& cd);
+    JSONNode jsonifyOrder(const Order& order);
+    JSONNode jsonifyOrderState(const OrderState& ostate);
+    JSONNode jsonifyExecution(const Execution& execution);
+    JSONNode jsonifyCommissionReport(const CommissionReport& cr);
 };
 
 #endif
