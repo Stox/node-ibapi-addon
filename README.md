@@ -5,6 +5,12 @@ Interactive Brokers API addon for Node.js compatible with IB API 9.71
 
 This addon uses the latest stable Interactive Brokers POSIX C++ API.
 
+Note:
+The inbound messages' are in the order it was received. Also, the outbound 
+messages are rate limited to 50 msg/sec as IB requires it.
+Default behavior is that if your outbound rate is greater than that the 
+51st message will be handled in the next second.
+
 Author: Jae Yang - [dchem] (https://github.com/dchem/)
 
 For direct JavaScript implementation of IB API for Node.js, please visit 
@@ -79,14 +85,14 @@ environment variables for Windows.
  * Add #define IB_USE_STD_STRING into the following files in /import directory:
     EClientSocketBase.cpp
     EPosixClientSocket.cpp
- * Downloads libjson and builds the static library
+ * Downloads libjson 7.6.1
 3. ```node-gyp rebuild```
 4. If build fails because you have VS2012, use ```node-gyp --msvs_version=2012 rebuild```
 
 ### Usage
 1. Require ibapi
 2. Create event handlers
-3. Register messageIds to a event handler
+3. Register event handlers for messageIds
 4. Invoke connectToIb
 5. ...
 6. Profit!
