@@ -7,6 +7,11 @@
 
 #include <queue>
 #include <utility>
+#include "import/Contract.h"
+#include "import/Order.h"
+#include "import/OrderState.h"
+#include "import/Execution.h"
+#include "import/CommissionReport.h"
 #include "import/libjson/_internal/Source/JSONNode.h"
 
 class EPosixClientSocket;
