@@ -23,6 +23,7 @@ migrate your code.
 
 ### Change Notes:
 
+* 2015-01-07 - 0.2.2  - More CPU efficient
 * 2014-12-29 - 0.2.1  - Uses event handlers instead of event emitters
 * 2014-11-12 - 0.1.23 - Includes lib into the package itself
 * 2014-09-10 - 0.1.21 - Supports API 9.71
