@@ -35,6 +35,14 @@ NodeIbapi.prototype = {
       var handler = this.handlers[message.messageId];
       handler(message);
     };
+    if (!this.client.isConnected()) {
+      message = {};
+      message.messageId = 'disconnected';
+      if (message.messageId in this.handlers) {
+        var handler = this.handlers[message.messageId];
+        handler(message);
+      };
+    };
     setTimeout(next,0);
   },
 
