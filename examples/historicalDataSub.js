@@ -28,27 +28,24 @@ var subscribeMsft = function () {
       "10 D", "1 hour", "MIDPOINT", "1", "1"));
 }
 
-var handleValidOrderId = function (message, callback) {
+var handleValidOrderId = function (message) {
   orderId = message.orderId;
   console.log('next order Id is ' + orderId);
   subscribeMsft();
-  callback();
 };
 
-var handleServerError = function (message, callback) {
+var handleServerError = function (message) {
   console.log('Error: ' + message.id.toString() + '-' +
               message.errorCode.toString() + '-' +
               message.errorString.toString());
-  callback();
 };
 
-var handleClientError = function (message, callback) {
+var handleClientError = function (message) {
   console.log('clientError');
   console.log(JSON.stringify(message));
-  callback();
 };
 
-var handleHistData = function (data, callback) {
+var handleHistData = function (data) {
   if (data.date.toString().indexOf("finished") < 0) {
     console.log( data.date + ' - ' + data.open + ' - ' + data.high + ' - ' +
                  data.low + ' - ' + data.close + ' - ' + data.volume + ' - ' +
@@ -60,7 +57,6 @@ var handleHistData = function (data, callback) {
   }
   // Or you can just stringify it:
   //  console.log(JSON.stringify(histData));
-  callback();
 }
 
 api.handlers[messageIds.nextValidId] = handleValidOrderId;
