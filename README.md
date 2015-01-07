@@ -96,7 +96,7 @@ environment variables for Windows.
 1. Require ibapi
 2. Create event handlers
 3. Register event handlers for messageIds
-4. Invoke connectToIb
+4. Invoke connect()
 5. ...
 6. Profit!
 
