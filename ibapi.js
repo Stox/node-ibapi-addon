@@ -19,47 +19,31 @@ function NodeIbapi() {
 NodeIbapi.prototype = {
 
   _consumeMessages: function () {
-    var messages = this.processMessage();
-
-    if(Object.keys(messages).length == 0){
-      setTimeout(this._consumeMessages.bind(this), 20); // sleep a bit
-      return;
-    }
-
-    async.eachSeries(Object.keys(messages), function (key, cb) {
-      if (key in this.handlers) {
-        var handler = this.handlers[key];
-        var message = messages[key];
-        return handler(message, cb);
-      }
-      return cb();
-    }.bind(this), function (err) {
-      if (err) {
+    async.forever( this.processMessage.bind(this),
+      function(err) {
         console.error(err);
         throw err;
       }
-      setImmediate(this._consumeMessages.bind(this));
-    }.bind(this));
+    );
   },
 
-  processMessage: function () {
-    var messages = {};
-    this.checkMessages();
+  processMessage: function (next) {
+    this.client.checkMessages();
     this.client.processMsg();
-
-    function checkMessage(objectData) {
-      if (objectData.messageId) {
-        messages[objectData.messageId] = objectData;
-      }
-    }
-
-    checkMessage(this.client.getInboundMsg());
-
-    if (!this.isConnected()) {
-      messages[messageIds.disconnected] = {};
-    }
-
-    return messages;
+    var message = this.client.getInboundMsg();
+    if (message.messageId in this.handlers) {
+      var handler = this.handlers[message.messageId];
+      handler(message);
+    };
+    if (!this.client.isConnected()) {
+      message = {};
+      message.messageId = 'disconnected';
+      if (message.messageId in this.handlers) {
+        var handler = this.handlers[message.messageId];
+        handler(message);
+      };
+    };
+    setTimeout(next,0);
   },
 
   connect: function (host, port, clientId) {

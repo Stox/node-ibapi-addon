@@ -23,6 +23,7 @@ migrate your code.
 
 ### Change Notes:
 
+* 2015-01-07 - 0.2.2  - More CPU efficient
 * 2014-12-29 - 0.2.1  - Uses event handlers instead of event emitters
 * 2014-11-12 - 0.1.23 - Includes lib into the package itself
 * 2014-09-10 - 0.1.21 - Supports API 9.71
@@ -123,31 +124,25 @@ var orderId = -1;
 // Here we specify the event handlers.
 //  Please follow this guideline for event handlers:
 //  1. Add handlers to listen to messages
-//  2. Each handler must have be a function (message, callback) signature
-//  3. Each handler must call the callback() to signal that processing
-//     finished
-var handleValidOrderId = function (message, callback) {
+//  2. Each handler must have be a function (message) signature
+var handleValidOrderId = function (message) {
   orderId = message.orderId;
   console.log('next order Id is ' + orderId);
-  callback();
 };
 
-var handleServerError = function (message, callback) {
+var handleServerError = function (message) {
   console.log('Error: ' + message.id.toString() + '-' +
               message.errorCode.toString() + '-' +
               message.errorString.toString());
-  callback();
 };
 
-var handleClientError = function (message, callback) {
+var handleClientError = function (message) {
   console.log('clientError');
   console.log(JSON.stringify(message));
-  callback();
 };
 
-var handleDisconnected = function (message, callback) {
+var handleDisconnected = function (message) {
   console.log('disconnected');
-  callback();
   process.exit(1);
 };
 

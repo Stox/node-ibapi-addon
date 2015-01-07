@@ -29,50 +29,43 @@ var cancelPrevOrder = function (prevOrderId) {
   setImmediate(api.cancelOrder.bind(api, prevOrderId));
 }
 
-var handleValidOrderId = function (message, callback) {
+var handleValidOrderId = function (message) {
   orderId = message.orderId;
   console.log('next order Id is ' + orderId);
   setInterval(placeThatOrder, 1000);
-  callback();
 };
 
-var handleServerError = function (message, callback) {
+var handleServerError = function (message) {
   console.log('Error: ' + message.id.toString() + '-' +
               message.errorCode.toString() + '-' +
               message.errorString.toString());
-  callback();
 };
 
-var handleClientError = function (message, callback) {
+var handleClientError = function (message) {
   console.log('clientError');
   console.log(JSON.stringify(message));
-  callback();
 };
 
-var handleDisconnected = function (message, callback) {
+var handleDisconnected = function (message) {
   console.log('disconnected');
-  callback();
   process.exit(1);
 };
 
-var handleOrderStatus = function (message, callback) {
+var handleOrderStatus = function (message) {
   console.log('OrderStatus: ');
   console.log(JSON.stringify(message));
   if (message.status == "PreSubmitted")
     cancelPrevOrder(message.orderId);
-  callback();
 };
 
-var handleOpenOrder = function (message, callback) {
+var handleOpenOrder = function (message) {
   console.log('OpenOrder: ');
   console.log(JSON.stringify(message));
-  callback();
 };
 
-var handleOpenOrderEnd = function (message, callback) {
+var handleOpenOrderEnd = function (message) {
   console.log('OpenOrderEnd: ');
   console.log(JSON.stringify(message));
-  callback();
 };
 
 api.handlers[messageIds.nextValidId] = handleValidOrderId;
