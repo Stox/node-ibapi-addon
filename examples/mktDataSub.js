@@ -29,19 +29,17 @@ gbpusd.primaryExchange = 'IDEALPRO';
 gbpusd.currency = 'USD';
 
 
-var handleValidOrderId = function (message, callback) {
+var handleValidOrderId = function (message) {
   orderId = message.orderId;
   console.log('next order Id is ' + orderId);
   setTimeout(api.reqMktData.bind(api,1, eurusd, "165", false), 300);
   setTimeout(api.reqMktData.bind(api,2, gbpusd, "165", false), 300);
-  callback();
 };
 
-var handleServerError = function (message, callback) {
+var handleServerError = function (message) {
   console.log('Error: ' + message.id.toString() + ' - ' +
               message.errorCode.toString() + ' - ' + 
               message.errorString.toString());
-  callback();
 };
 
 var tickTypes={
@@ -53,26 +51,22 @@ var tickTypes={
     9:"close"
 };
 
-var handleTickPrice = function (tickPrice, callback) {
+var handleTickPrice = function (tickPrice) {
   console.log("TickPrice: " + requestToInstrument[tickPrice.tickerId]+ " " +
               tickTypes[tickPrice.field] + " " + tickPrice.price.toString() + 
               " " + tickPrice.canAutoExecute.toString());
-  callback();
 };
-var handleTickSize = function (tickSize, callback) {
+var handleTickSize = function (tickSize) {
   console.log("TickSize: " + tickSize.tickerId.toString() + " " +
               tickSize.field.toString() + " " + tickSize.size.toString());
-  callback();
 };
-var handleClientError = function (message, callback) {
+var handleClientError = function (message) {
   console.log('clientError');
   console.log(JSON.stringify(message));
-  callback();
 };
 
-var handleDisconnected = function (message, callback) {
+var handleDisconnected = function (message) {
   console.log('disconnected');
-  callback();
   process.exit(1);
 };
 

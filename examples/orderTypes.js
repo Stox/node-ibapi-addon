@@ -96,37 +96,32 @@ function createLimitOrder() {
   api.placeOrder(orderId, msftContract1, newOrder);
 }
 
-var handleValidOrderId = function (message, callback) {
+var handleValidOrderId = function (message) {
   orderId = message.orderId;
 
   // Try out the different order types shown above. For more details,
   //  see IB API documentation
   createMarketOrder();
   console.log('next order Id is ' + orderId);
-  callback();
 };
 
-var handleServerError = function (message, callback) {
+var handleServerError = function (message) {
   console.log('Error: ' + message.id.toString() + '-' +
               message.errorCode.toString() + '-' +
               message.errorString.toString());
-  callback();
 };
 
-var handleOrderStatus = function (message, callback) {
+var handleOrderStatus = function (message) {
   console.log(JSON.stringify(message));
-  callback();
 };
 
-var handleOpenOrder = function (message, callback) {
+var handleOpenOrder = function (message) {
   console.log(JSON.stringify(message))
-  callback();
 };
 
-var handleExecutions = function (message, callback) {
+var handleExecutions = function (message) {
   console.log('execDetails');
   console.log(JSON.stringify(message));
-  callback();
 };
 
 api.handlers[messageIds.nextValidId] = handleValidOrderId;

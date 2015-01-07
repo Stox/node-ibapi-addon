@@ -27,34 +27,30 @@ var addMsft = function () {
   api.reqRealtimeBars(1,msftContract,5,"TRADES",false);
 };
 
-var handleValidOrderId = function (message, callback) {
+var handleValidOrderId = function (message) {
   orderId = message.orderId;
   console.log('next order Id is ' + orderId);
   addEurUsd();
   addMsft();
-  callback();
 };
 
-var handleServerError = function (message, callback) {
+var handleServerError = function (message) {
   console.log('Error: ' + message.id.toString() + '-' +
               message.errorCode.toString() + '-' +
               message.errorString.toString());
-  callback();
 };
 
-var handleClientError = function (message, callback) {
+var handleClientError = function (message) {
   console.log('clientError');
   console.log(JSON.stringify(message));
-  callback();
 };
 
-var handleDisconnected = function (message, callback) {
+var handleDisconnected = function (message) {
   console.log('disconnected');
-  callback();
   process.exit(1);
 };
 
-var handleRealTimeBar = function (realtimeBar, callback) {
+var handleRealTimeBar = function (realtimeBar) {
   console.log( "RealtimeBar: " + 
                 realtimeBar.reqId.toString() + " " +
                 realtimeBar.time.toString() + " " +
@@ -66,7 +62,6 @@ var handleRealTimeBar = function (realtimeBar, callback) {
                 realtimeBar.wap.toString() + " " +
                 realtimeBar.count.toString()
   );
-  callback();
 };
 
 // After that, you must register the event handler with a messageId
