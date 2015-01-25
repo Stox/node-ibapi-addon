@@ -26,26 +26,30 @@ NodeIbapi.prototype = {
       }
     );
   },
-
+  
   processMessage: function (next) {
-    this.client.checkMessages();
-    this.client.processMsg();
-    var message = this.client.getInboundMsg();
-    if (message.messageId in this.handlers) {
-      var handler = this.handlers[message.messageId];
-      handler(message);
-    };
-    if (!this.client.isConnected()) {
-      message = {};
-      message.messageId = 'disconnected';
+      this.client.checkMessages();
+      this.client.processMsg();
+      var message = this.client.getInboundMsg();
       if (message.messageId in this.handlers) {
-        var handler = this.handlers[message.messageId];
-        handler(message);
+          var handler = this.handlers[message.messageId];
+          return handler(message, next);
       };
-    };
-    setTimeout(next,0);
+      if (!this.client.isConnected()) {
+          message = {};
+          message.messageId = 'disconnected';
+          if (message.messageId in this.handlers) {
+              var handler = this.handlers[message.messageId];
+              return handler(message, next);
+          };
+      };
+      setTimeout(next,0);
   },
 
+  _startKeepAlive: function(){
+      setInterval(this.reqCurrentTime.bind(this), 500);
+  },
+    
   connect: function (host, port, clientId) {
     return this.client.connect(host, port, clientId)
   },
@@ -53,6 +57,7 @@ NodeIbapi.prototype = {
   beginProcessing: function () {
     if (!this.isProcessing) {
       this._consumeMessages();
+      this._startKeepAlive();
       this.isProcessing = true;
     }
   },
